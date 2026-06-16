@@ -44,6 +44,9 @@ public class Lancamento {
     @Column(name = "data_vencimento")
     private LocalDate dataVencimento;
 
+    @Column(name = "data_pagamento")
+    private LocalDate dataPagamento;
+
     private String observacao;
 
     @Column(nullable = false)
