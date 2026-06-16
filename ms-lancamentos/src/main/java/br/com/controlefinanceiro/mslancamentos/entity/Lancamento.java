@@ -41,6 +41,9 @@ public class Lancamento {
     @Column(name = "data_lancamento", nullable = false)
     private LocalDate dataLancamento;
 
+    @Column(name = "data_vencimento")
+    private LocalDate dataVencimento;
+
     private String observacao;
 
     @Column(nullable = false)
