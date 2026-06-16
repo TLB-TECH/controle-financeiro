@@ -20,7 +20,6 @@ public record LancamentoRequestDTO(
         @NotNull(message = "Tipo é obrigatório")
         TipoLancamento tipo,
 
-        @NotNull(message = "Data é obrigatória")
         LocalDate dataLancamento,
 
         String observacao
