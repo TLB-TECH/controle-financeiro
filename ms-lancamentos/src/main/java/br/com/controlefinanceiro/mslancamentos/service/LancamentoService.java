@@ -33,6 +33,7 @@ public class LancamentoService {
                 .valor(dto.valor())
                 .tipo(dto.tipo())
                 .dataLancamento(dto.dataLancamento() != null ? dto.dataLancamento() : LocalDate.now())
+                .dataVencimento(dto.dataVencimento())
                 .observacao(dto.observacao())
                 .usuarioId(email)
                 .build();
@@ -89,6 +90,7 @@ public class LancamentoService {
         lancamento.setValor(dto.valor());
         lancamento.setTipo(dto.tipo());
         lancamento.setDataLancamento(dto.dataLancamento() != null ? dto.dataLancamento() : lancamento.getDataLancamento());
+        lancamento.setDataVencimento(dto.dataVencimento());
         lancamento.setObservacao(dto.observacao());
 
         return LancamentoResponseDTO.fromEntity(lancamentoRepository.save(lancamento));

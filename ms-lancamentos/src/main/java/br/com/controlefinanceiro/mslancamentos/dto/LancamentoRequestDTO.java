@@ -22,5 +22,7 @@ public record LancamentoRequestDTO(
 
         LocalDate dataLancamento,
 
+        LocalDate dataVencimento,
+
         String observacao
 ) {}
