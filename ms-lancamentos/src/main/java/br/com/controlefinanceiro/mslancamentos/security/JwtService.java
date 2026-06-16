@@ -1,4 +1,4 @@
-package br.com.controlefinanceiro.msusuarios.security;
+package br.com.controlefinanceiro.mslancamentos.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -17,7 +17,7 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${jwt.expiration}")
+    @Value("${jwt.expiration:86400000}")
     private Long expiration;
 
     private SecretKey chave;
@@ -25,15 +25,6 @@ public class JwtService {
     @PostConstruct
     public void init() {
         this.chave = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-    }
-
-    public String gerarToken(String email) {
-        return Jwts.builder()
-                .subject(email)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(chave)
-                .compact();
     }
 
     public String extrairEmail(String token) {
@@ -55,6 +46,4 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload();
     }
-
-
 }
