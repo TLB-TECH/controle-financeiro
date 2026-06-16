@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -31,7 +32,7 @@ public class LancamentoService {
                 .descricao(dto.descricao())
                 .valor(dto.valor())
                 .tipo(dto.tipo())
-                .dataLancamento(dto.dataLancamento())
+                .dataLancamento(dto.dataLancamento() != null ? dto.dataLancamento() : LocalDate.now())
                 .observacao(dto.observacao())
                 .usuarioId(email)
                 .build();
@@ -87,7 +88,7 @@ public class LancamentoService {
         lancamento.setDescricao(dto.descricao());
         lancamento.setValor(dto.valor());
         lancamento.setTipo(dto.tipo());
-        lancamento.setDataLancamento(dto.dataLancamento());
+        lancamento.setDataLancamento(dto.dataLancamento() != null ? dto.dataLancamento() : lancamento.getDataLancamento());
         lancamento.setObservacao(dto.observacao());
 
         return LancamentoResponseDTO.fromEntity(lancamentoRepository.save(lancamento));
