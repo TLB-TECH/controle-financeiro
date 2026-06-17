@@ -18,6 +18,8 @@ public interface LancamentoRepository extends JpaRepository<Lancamento, Long> {
 
     List<Lancamento> findByUsuarioIdAndStatusAndAtivoTrue(String usuarioId, StatusLancamento status);
 
+    List<Lancamento> findByUsuarioIdAndDescricaoContainingIgnoreCaseAndAtivoTrue(String usuarioId, String descricao);
+
     Optional<Lancamento> findByIdAndAtivoTrue(Long id);
 
 }
