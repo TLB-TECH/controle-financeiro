@@ -1,5 +1,6 @@
 package br.com.controlefinanceiro.mslancamentos.controller;
 
+import br.com.controlefinanceiro.mslancamentos.dto.EfetivarRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoResponseDTO;
 import br.com.controlefinanceiro.mslancamentos.enums.StatusLancamento;
@@ -57,7 +58,9 @@ public class LancamentoController {
     }
 
     @PatchMapping("/{id}/efetivar")
-    public ResponseEntity<LancamentoResponseDTO> efetivar(@PathVariable Long id) {
-        return ResponseEntity.ok(lancamentoService.efetivar(id));
+    public ResponseEntity<LancamentoResponseDTO> efetivar(@PathVariable Long id,
+                                                          @RequestBody(required = false)EfetivarRequestDTO dto) {
+        if (dto == null) dto = new EfetivarRequestDTO(null);
+        return ResponseEntity.ok(lancamentoService.efetivar(id, dto));
     }
 }
