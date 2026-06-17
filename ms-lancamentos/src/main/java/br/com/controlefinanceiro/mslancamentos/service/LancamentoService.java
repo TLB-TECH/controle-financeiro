@@ -80,6 +80,14 @@ public class LancamentoService {
                 .toList();
     }
 
+    public List<LancamentoResponseDTO> listarPorDescricao(String descricao) {
+        String email = getEmailAutenticado();
+        return lancamentoRepository.findByUsuarioIdAndDescricaoContainingIgnoreCaseAndAtivoTrue(email, descricao)
+                .stream()
+                .map(LancamentoResponseDTO::fromEntity)
+                .toList();
+    }
+
     public LancamentoResponseDTO buscarPorId(Long id) {
         String email = getEmailAutenticado();
         Lancamento lancamento = lancamentoRepository.findByIdAndAtivoTrue(id)
