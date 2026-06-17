@@ -1,5 +1,6 @@
 package br.com.controlefinanceiro.mslancamentos.service;
 
+import br.com.controlefinanceiro.mslancamentos.dto.EfetivarRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoResponseDTO;
 import br.com.controlefinanceiro.mslancamentos.entity.Lancamento;
@@ -109,7 +110,7 @@ public class LancamentoService {
         lancamentoRepository.save(lancamento);
     }
 
-    public LancamentoResponseDTO efetivar(Long id) {
+    public LancamentoResponseDTO efetivar(Long id, EfetivarRequestDTO dto) {
         String email = getEmailAutenticado();
         Lancamento lancamento = lancamentoRepository.findByIdAndAtivoTrue(id)
                 .orElseThrow(() -> new LancamentoNaoEncontradoException("Lançamento não encontrado"));
@@ -123,7 +124,7 @@ public class LancamentoService {
         }
 
         lancamento.setStatus(StatusLancamento.EFETIVADO);
-        lancamento.setDataLancamento(LocalDate.now());
+        lancamento.setDataPagamento(dto.dataPagamento() != null ? dto.dataPagamento() : LocalDate.now());
         return LancamentoResponseDTO.fromEntity(lancamentoRepository.save(lancamento));
     }
 }
