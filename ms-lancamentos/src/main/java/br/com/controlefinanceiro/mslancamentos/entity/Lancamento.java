@@ -1,5 +1,6 @@
 package br.com.controlefinanceiro.mslancamentos.entity;
 
+import br.com.controlefinanceiro.mslancamentos.enums.FormaPagamento;
 import br.com.controlefinanceiro.mslancamentos.enums.StatusLancamento;
 import br.com.controlefinanceiro.mslancamentos.enums.TipoJuros;
 import br.com.controlefinanceiro.mslancamentos.enums.TipoLancamento;
@@ -63,6 +64,14 @@ public class Lancamento {
 
     @Column(name = "data_pagamento")
     private LocalDate dataPagamento;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "forma_pagamento", length = 20)
+    private FormaPagamento formaPagamento;
+
+    @Column(name = "numero_parcelas")
+    @Builder.Default
+    private Integer numeroParcelas = 1;
 
     private String observacao;
 
