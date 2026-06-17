@@ -1,6 +1,7 @@
 package br.com.controlefinanceiro.mslancamentos.dto;
 
 import br.com.controlefinanceiro.mslancamentos.entity.Lancamento;
+import br.com.controlefinanceiro.mslancamentos.enums.FormaPagamento;
 import br.com.controlefinanceiro.mslancamentos.enums.StatusLancamento;
 import br.com.controlefinanceiro.mslancamentos.enums.TipoJuros;
 import br.com.controlefinanceiro.mslancamentos.enums.TipoLancamento;
@@ -19,6 +20,8 @@ public record LancamentoResponseDTO(
         BigDecimal desconto,
         BigDecimal valor,
         TipoLancamento tipo,
+        FormaPagamento formaPagamento,
+        Integer numeroParcelas,
         StatusLancamento status,
         LocalDate dataLancamento,
         LocalDate dataVencimento,
@@ -40,6 +43,8 @@ public record LancamentoResponseDTO(
                 lancamento.getDesconto(),
                 lancamento.getValor(),
                 lancamento.getTipo(),
+                lancamento.getFormaPagamento(),
+                lancamento.getNumeroParcelas(),
                 lancamento.getStatus(),
                 lancamento.getDataLancamento(),
                 lancamento.getDataVencimento(),
