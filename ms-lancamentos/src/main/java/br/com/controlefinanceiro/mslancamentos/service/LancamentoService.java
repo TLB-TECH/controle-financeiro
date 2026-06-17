@@ -45,6 +45,8 @@ public class LancamentoService {
                 .desconto(dto.desconto())
                 .valor(calcularValor(dto.valorOriginal(), dto.juros(), dto.desconto()))
                 .tipo(dto.tipo())
+                .formaPagamento(dto.formaPagamento())
+                .numeroParcelas(dto.numeroParcelas() != null ? dto.numeroParcelas() : 1)
                 .dataLancamento(dto.dataLancamento() != null ? dto.dataLancamento() : LocalDate.now())
                 .dataVencimento(dto.dataVencimento())
                 .observacao(dto.observacao())
@@ -103,6 +105,8 @@ public class LancamentoService {
         lancamento.setValorOriginal(dto.valorOriginal());
         lancamento.setTaxaJuros(dto.taxaJuros());
         lancamento.setTipoJuros(dto.tipoJuros());
+        lancamento.setFormaPagamento(dto.formaPagamento());
+        lancamento.setNumeroParcelas(dto.numeroParcelas() != null ? dto.numeroParcelas() : 1);
         lancamento.setJuros(dto.juros());
         lancamento.setDesconto(dto.desconto());
         lancamento.setValor(calcularValor(dto.valorOriginal(), dto.juros(), dto.desconto()));
