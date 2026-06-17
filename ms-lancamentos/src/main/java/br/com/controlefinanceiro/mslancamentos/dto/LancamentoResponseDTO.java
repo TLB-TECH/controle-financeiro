@@ -2,6 +2,7 @@ package br.com.controlefinanceiro.mslancamentos.dto;
 
 import br.com.controlefinanceiro.mslancamentos.entity.Lancamento;
 import br.com.controlefinanceiro.mslancamentos.enums.StatusLancamento;
+import br.com.controlefinanceiro.mslancamentos.enums.TipoJuros;
 import br.com.controlefinanceiro.mslancamentos.enums.TipoLancamento;
 
 import java.math.BigDecimal;
@@ -11,6 +12,11 @@ import java.time.LocalDateTime;
 public record LancamentoResponseDTO(
         Long id,
         String descricao,
+        BigDecimal valorOriginal,
+        BigDecimal taxaJuros,
+        TipoJuros tipoJuros,
+        BigDecimal juros,
+        BigDecimal desconto,
         BigDecimal valor,
         TipoLancamento tipo,
         StatusLancamento status,
@@ -27,6 +33,11 @@ public record LancamentoResponseDTO(
         return new LancamentoResponseDTO(
                 lancamento.getId(),
                 lancamento.getDescricao(),
+                lancamento.getValorOriginal(),
+                lancamento.getTaxaJuros(),
+                lancamento.getTipoJuros(),
+                lancamento.getJuros(),
+                lancamento.getDesconto(),
                 lancamento.getValor(),
                 lancamento.getTipo(),
                 lancamento.getStatus(),
