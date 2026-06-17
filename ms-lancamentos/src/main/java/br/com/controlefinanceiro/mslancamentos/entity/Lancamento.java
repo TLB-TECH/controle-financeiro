@@ -1,6 +1,7 @@
 package br.com.controlefinanceiro.mslancamentos.entity;
 
 import br.com.controlefinanceiro.mslancamentos.enums.StatusLancamento;
+import br.com.controlefinanceiro.mslancamentos.enums.TipoJuros;
 import br.com.controlefinanceiro.mslancamentos.enums.TipoLancamento;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,6 +28,22 @@ public class Lancamento {
     @Column(nullable = false)
     private String descricao;
 
+    @Column(name = "valor_original", nullable = false, precision = 15, scale = 2)
+    private BigDecimal valorOriginal;
+
+    @Column(name = "taxa_juros", precision = 5, scale = 2)
+    private BigDecimal taxaJuros;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_juros", length = 10)
+    private TipoJuros tipoJuros;
+
+    @Column(precision = 15, scale = 2)
+    private BigDecimal juros;
+
+    @Column(precision = 15, scale = 2)
+    private BigDecimal desconto;
+
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal valor;
 
@@ -40,6 +57,12 @@ public class Lancamento {
 
     @Column(name = "data_lancamento", nullable = false)
     private LocalDate dataLancamento;
+
+    @Column(name = "data_vencimento")
+    private LocalDate dataVencimento;
+
+    @Column(name = "data_pagamento")
+    private LocalDate dataPagamento;
 
     private String observacao;
 

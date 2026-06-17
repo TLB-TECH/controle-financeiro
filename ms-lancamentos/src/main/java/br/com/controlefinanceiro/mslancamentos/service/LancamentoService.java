@@ -1,5 +1,6 @@
 package br.com.controlefinanceiro.mslancamentos.service;
 
+import br.com.controlefinanceiro.mslancamentos.dto.EfetivarRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoResponseDTO;
 import br.com.controlefinanceiro.mslancamentos.entity.Lancamento;
@@ -12,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -24,14 +27,26 @@ public class LancamentoService {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
+    private BigDecimal calcularValor(BigDecimal valorOriginal, BigDecimal juros, BigDecimal desconto) {
+        BigDecimal j = juros != null ? juros : BigDecimal.ZERO;
+        BigDecimal d = desconto != null ? desconto : BigDecimal.ZERO;
+        return valorOriginal.add(j).subtract(d);
+    }
+
     public LancamentoResponseDTO criar(LancamentoRequestDTO dto) {
         String email = getEmailAutenticado();
 
         Lancamento lancamento = Lancamento.builder()
                 .descricao(dto.descricao())
-                .valor(dto.valor())
+                .valorOriginal(dto.valorOriginal())
+                .taxaJuros(dto.taxaJuros())
+                .tipoJuros(dto.tipoJuros())
+                .juros(dto.juros())
+                .desconto(dto.desconto())
+                .valor(calcularValor(dto.valorOriginal(), dto.juros(), dto.desconto()))
                 .tipo(dto.tipo())
-                .dataLancamento(dto.dataLancamento())
+                .dataLancamento(dto.dataLancamento() != null ? dto.dataLancamento() : LocalDate.now())
+                .dataVencimento(dto.dataVencimento())
                 .observacao(dto.observacao())
                 .usuarioId(email)
                 .build();
@@ -66,7 +81,7 @@ public class LancamentoService {
     public LancamentoResponseDTO buscarPorId(Long id) {
         String email = getEmailAutenticado();
         Lancamento lancamento = lancamentoRepository.findByIdAndAtivoTrue(id)
-                .orElseThrow(() ->  new LancamentoNaoAutorizadoException("Lançamento não encontrado"));
+                .orElseThrow(() -> new LancamentoNaoAutorizadoException("Lançamento não encontrado"));
 
         if (!lancamento.getUsuarioId().equals(email)) {
             throw new LancamentoNaoAutorizadoException("Acesso negado");
@@ -85,9 +100,15 @@ public class LancamentoService {
         }
 
         lancamento.setDescricao(dto.descricao());
-        lancamento.setValor(dto.valor());
+        lancamento.setValorOriginal(dto.valorOriginal());
+        lancamento.setTaxaJuros(dto.taxaJuros());
+        lancamento.setTipoJuros(dto.tipoJuros());
+        lancamento.setJuros(dto.juros());
+        lancamento.setDesconto(dto.desconto());
+        lancamento.setValor(calcularValor(dto.valorOriginal(), dto.juros(), dto.desconto()));
         lancamento.setTipo(dto.tipo());
-        lancamento.setDataLancamento(dto.dataLancamento());
+        lancamento.setDataLancamento(dto.dataLancamento() != null ? dto.dataLancamento() : lancamento.getDataLancamento());
+        lancamento.setDataVencimento(dto.dataVencimento());
         lancamento.setObservacao(dto.observacao());
 
         return LancamentoResponseDTO.fromEntity(lancamentoRepository.save(lancamento));
@@ -106,7 +127,7 @@ public class LancamentoService {
         lancamentoRepository.save(lancamento);
     }
 
-    public LancamentoResponseDTO efetivar(Long id) {
+    public LancamentoResponseDTO efetivar(Long id, EfetivarRequestDTO dto) {
         String email = getEmailAutenticado();
         Lancamento lancamento = lancamentoRepository.findByIdAndAtivoTrue(id)
                 .orElseThrow(() -> new LancamentoNaoEncontradoException("Lançamento não encontrado"));
@@ -120,6 +141,7 @@ public class LancamentoService {
         }
 
         lancamento.setStatus(StatusLancamento.EFETIVADO);
+        lancamento.setDataPagamento(dto.dataPagamento() != null ? dto.dataPagamento() : LocalDate.now());
         return LancamentoResponseDTO.fromEntity(lancamentoRepository.save(lancamento));
     }
 }

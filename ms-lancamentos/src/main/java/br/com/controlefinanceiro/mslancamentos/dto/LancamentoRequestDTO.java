@@ -1,5 +1,6 @@
 package br.com.controlefinanceiro.mslancamentos.dto;
 
+import br.com.controlefinanceiro.mslancamentos.enums.TipoJuros;
 import br.com.controlefinanceiro.mslancamentos.enums.TipoLancamento;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -13,15 +14,27 @@ public record LancamentoRequestDTO(
         @NotBlank(message = "Descrição é obrigatória")
         String descricao,
 
-        @NotNull(message = "Valor é obrigatório")
+        @NotNull(message = "Valor origina é obrigatório")
         @DecimalMin(value = "0.01", message = "Valor deve ser maior que zero")
-        BigDecimal valor,
+        BigDecimal valorOriginal,
+
+        @DecimalMin(value = "0,00", message = "Taxa de juros não pode ser negativa")
+        BigDecimal taxaJuros,
+
+        TipoJuros tipoJuros,
+
+        @DecimalMin(value = "0,00", message = "Juros não pode ser negativo")
+        BigDecimal juros,
+
+        @DecimalMin(value = "0,00", message = "Desconto não pode ser negativo")
+        BigDecimal desconto,
 
         @NotNull(message = "Tipo é obrigatório")
         TipoLancamento tipo,
 
-        @NotNull(message = "Data é obrigatória")
         LocalDate dataLancamento,
+
+        LocalDate dataVencimento,
 
         String observacao
 ) {}
