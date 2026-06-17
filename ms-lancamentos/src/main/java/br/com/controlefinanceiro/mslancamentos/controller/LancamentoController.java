@@ -29,13 +29,17 @@ public class LancamentoController {
     @GetMapping
     public ResponseEntity<List<LancamentoResponseDTO>> listar(
             @RequestParam(required = false) TipoLancamento tipo,
-            @RequestParam(required = false) StatusLancamento status) {
+            @RequestParam(required = false) StatusLancamento status,
+            @RequestParam(required = false) String descricao) {
 
         if (tipo != null) {
             return ResponseEntity.ok(lancamentoService.listarPorTipo(tipo));
         }
         if (status != null) {
             return ResponseEntity.ok(lancamentoService.listarPorStatus(status));
+        }
+        if (descricao != null && !descricao.isBlank()) {
+            return ResponseEntity.ok(lancamentoService.listarPorDescricao(descricao));
         }
         return ResponseEntity.ok(lancamentoService.listar());
     }
