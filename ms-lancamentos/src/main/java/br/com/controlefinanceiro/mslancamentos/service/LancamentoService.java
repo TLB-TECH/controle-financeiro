@@ -123,6 +123,7 @@ public class LancamentoService {
         }
 
         lancamento.setStatus(StatusLancamento.EFETIVADO);
+        lancamento.setDataLancamento(LocalDate.now());
         return LancamentoResponseDTO.fromEntity(lancamentoRepository.save(lancamento));
     }
 }
