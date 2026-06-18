@@ -39,4 +39,4 @@ jobs:
         env:
           DB_PASSWORD: postgres
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        run: mvn -f ms-centro-custo/pom.xml clean verify
+        run: mvn clean verify
