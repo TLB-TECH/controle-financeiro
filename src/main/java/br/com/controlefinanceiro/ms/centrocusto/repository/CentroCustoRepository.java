@@ -1,4 +1,4 @@
-package br.com.controlefinanceiro.ms.centrocusto.reposytory;
+package br.com.controlefinanceiro.ms.centrocusto.repository;
 
 import br.com.controlefinanceiro.ms.centrocusto.model.CentroCusto;
 import org.springframework.data.jpa.repository.JpaRepository;
