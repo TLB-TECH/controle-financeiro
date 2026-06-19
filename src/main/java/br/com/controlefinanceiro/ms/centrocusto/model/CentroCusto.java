@@ -43,8 +43,9 @@ public class CentroCusto {
         this.ativo = true;
     }
 
-    @PrePersist
+    @PreUpdate
     public void preUpdate() {
+
         this.atualizadoEm = LocalDateTime.now();
     }
 }
