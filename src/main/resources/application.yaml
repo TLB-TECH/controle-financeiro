@@ -2,7 +2,7 @@ spring:
   application:
     name: api-gateway
   cloud:
-    compatibilidade-verifier:
+    compatibility-verifier:
       enabled: false
     gateway:
       routes:
@@ -18,18 +18,17 @@ spring:
 
         - id: ms-centro-custo
           uri: http://localhost:8082
-          predicate:
+          predicates:
             - Path=/centros-custo/**
 
         - id: ms-fluxo-caixa
           uri: http://localhost:8084
-          precicates:
+          predicates:
             - Path=/fluxo-caixa/**
 
+server:
+  port: 8080
 
-  server:
-    port: 8080
-
-  jwt:
-    secret: ${JWT_SECRET}
-    expiration: ${JWT_EXPIRATION:86400000}
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
