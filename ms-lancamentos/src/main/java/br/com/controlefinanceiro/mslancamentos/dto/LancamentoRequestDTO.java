@@ -43,5 +43,7 @@ public record LancamentoRequestDTO(
 
         LocalDate dataVencimento,
 
-        String observacao
+        String observacao,
+
+        Long centroCustoId
 ) {}
