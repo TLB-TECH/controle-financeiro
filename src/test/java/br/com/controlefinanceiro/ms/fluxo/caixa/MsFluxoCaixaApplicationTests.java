@@ -8,7 +8,8 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = {
 		"ms-lancamentos.url=http://localhost:8083",
 		"jwt.secret=minha-chave-secreta-super-segura-financeiro-2026",
-		"jwt.expiration=86400000"
+		"jwt.expiration=86400000",
+		"spring.cloud.compatibility-verifier.enabled=false"
 })
 class MsFluxoCaixaApplicationTests {
 

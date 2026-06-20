@@ -1,13 +1,16 @@
 spring:
   application:
     name: ms-fluxo-caixa
+  cloud:
+    compatibility-verifier:
+      enabled: false
 
-  server:
-    port: 8084
+server:
+  port: 8084
 
-  jwt:
-    secret: ${JWT_SECRET}
-    expiration: ${JWT_EXPIRATION:86400000}
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
 
-  ms-lancamentos:
-    url: http://localhost:8083
+ms-lancamentos:
+  url: http://localhost:8083
