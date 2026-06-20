@@ -75,6 +75,9 @@ public class Lancamento {
 
     private String observacao;
 
+    @Column(name = "centro_custo_id")
+    private Long centroCustoId;
+
     @Column(nullable = false)
     private Boolean ativo;
 

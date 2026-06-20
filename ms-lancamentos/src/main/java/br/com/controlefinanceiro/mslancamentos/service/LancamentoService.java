@@ -1,5 +1,6 @@
 package br.com.controlefinanceiro.mslancamentos.service;
 
+import br.com.controlefinanceiro.mslancamentos.client.CentroCustoClient;
 import br.com.controlefinanceiro.mslancamentos.dto.EfetivarRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoResponseDTO;
@@ -9,6 +10,8 @@ import br.com.controlefinanceiro.mslancamentos.enums.TipoLancamento;
 import br.com.controlefinanceiro.mslancamentos.exception.LancamentoNaoAutorizadoException;
 import br.com.controlefinanceiro.mslancamentos.exception.LancamentoNaoEncontradoException;
 import br.com.controlefinanceiro.mslancamentos.repository.LancamentoRepository;
+import feign.FeignException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -22,9 +25,24 @@ import java.util.List;
 public class LancamentoService {
 
     private final LancamentoRepository lancamentoRepository;
+    private final CentroCustoClient centroCustoClient;
+    private final HttpServletRequest request;
 
     private String getEmailAutenticado() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    private String getToken() {
+        return request.getHeader("Authorization");
+    }
+
+    private void validarCentroCusto(Long centroCustoId) {
+        if (centroCustoId == null) return;
+        try {
+            centroCustoClient.buscarPorId(centroCustoId, getToken());
+        } catch (FeignException.NotFound e) {
+            throw new LancamentoNaoEncontradoException("Centro de custo não encontrado ou não pertence ao usuário");
+        }
     }
 
     private BigDecimal calcularValor(BigDecimal valorOriginal, BigDecimal juros, BigDecimal desconto) {
@@ -35,6 +53,7 @@ public class LancamentoService {
 
     public LancamentoResponseDTO criar(LancamentoRequestDTO dto) {
         String email = getEmailAutenticado();
+        validarCentroCusto(dto.centroCustoId());
 
         Lancamento lancamento = Lancamento.builder()
                 .descricao(dto.descricao())
@@ -50,6 +69,7 @@ public class LancamentoService {
                 .dataLancamento(dto.dataLancamento() != null ? dto.dataLancamento() : LocalDate.now())
                 .dataVencimento(dto.dataVencimento())
                 .observacao(dto.observacao())
+                .centroCustoId(dto.centroCustoId())
                 .usuarioId(email)
                 .build();
 
@@ -80,6 +100,14 @@ public class LancamentoService {
                 .toList();
     }
 
+    public List<LancamentoResponseDTO> listarPorDescricao(String descricao) {
+        String email = getEmailAutenticado();
+        return lancamentoRepository.findByUsuarioIdAndDescricaoContainingIgnoreCaseAndAtivoTrue(email, descricao)
+                .stream()
+                .map(LancamentoResponseDTO::fromEntity)
+                .toList();
+    }
+
     public LancamentoResponseDTO buscarPorId(Long id) {
         String email = getEmailAutenticado();
         Lancamento lancamento = lancamentoRepository.findByIdAndAtivoTrue(id)
@@ -101,6 +129,8 @@ public class LancamentoService {
             throw new LancamentoNaoAutorizadoException("Acesso negado");
         }
 
+        validarCentroCusto(dto.centroCustoId());
+
         lancamento.setDescricao(dto.descricao());
         lancamento.setValorOriginal(dto.valorOriginal());
         lancamento.setTaxaJuros(dto.taxaJuros());
@@ -114,6 +144,7 @@ public class LancamentoService {
         lancamento.setDataLancamento(dto.dataLancamento() != null ? dto.dataLancamento() : lancamento.getDataLancamento());
         lancamento.setDataVencimento(dto.dataVencimento());
         lancamento.setObservacao(dto.observacao());
+        lancamento.setCentroCustoId(dto.centroCustoId());
 
         return LancamentoResponseDTO.fromEntity(lancamentoRepository.save(lancamento));
     }
