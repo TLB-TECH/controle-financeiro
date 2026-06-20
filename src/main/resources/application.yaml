@@ -1,3 +1,22 @@
 spring:
   application:
     name: bff-financeiro
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
+server:
+  port: 8085
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+ms-lancamentos:
+  url: http://localhost:8083
+
+ms-centro-custo:
+  url: http://localhost:8082
+
+ms-fluxo-caixa:
+  url: http://localhost:8084
