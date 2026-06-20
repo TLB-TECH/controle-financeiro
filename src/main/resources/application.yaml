@@ -1,3 +1,34 @@
 spring:
   application:
     name: api-gateway
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    gateway:
+      routes:
+        - id: ms-usuarios
+          uri: http://localhost:8081
+          predicates:
+            - Path=/usuarios/**, /auth/**
+
+        - id: ms-lancamentos
+          uri: http://localhost:8083
+          predicates:
+            - Path=/lancamentos/**
+
+        - id: ms-centro-custo
+          uri: http://localhost:8082
+          predicates:
+            - Path=/centros-custo/**
+
+        - id: ms-fluxo-caixa
+          uri: http://localhost:8084
+          predicates:
+            - Path=/fluxo-caixa/**
+
+server:
+  port: 8080
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
