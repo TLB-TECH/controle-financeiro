@@ -13,10 +13,10 @@ jwt:
   expiration: ${JWT_EXPIRATION:86400000}
 
 ms-lancamentos:
-  url: http://localhost:8083
+  url: ${MS_LANCAMENTOS_URL:http://localhost:8083}
 
 ms-centro-custo:
-  url: http://localhost:8082
+  url: ${MS_CENTRO_CUSTO_URL:http://localhost:8082}
 
 ms-fluxo-caixa:
-  url: http://localhost:8084
+  url: ${MS_FLUXO_CAIXA_URL:http://localhost:8084}
