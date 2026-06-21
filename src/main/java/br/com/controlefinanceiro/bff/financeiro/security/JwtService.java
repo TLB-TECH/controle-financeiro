@@ -35,11 +35,14 @@ public class JwtService {
         }
     }
 
+    public String getEmailDoToken(String token) {
+        return getClaims(token).getSubject();
+    }
+
     private Claims getClaims(String token) {
         return Jwts.parser()
                 .verifyWith(chave)
                 .build()
                 .parseSignedClaims(token)
-                .getPayload();
-    }
+                .getPayload();}
 }
