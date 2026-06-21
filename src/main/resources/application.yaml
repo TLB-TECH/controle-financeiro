@@ -7,22 +7,22 @@ spring:
     gateway:
       routes:
         - id: ms-usuarios
-          uri: http://localhost:8081
+          uri: ${MS_USUARIOS_URL:http://localhost:8081}
           predicates:
             - Path=/usuarios/**, /auth/**
 
         - id: ms-lancamentos
-          uri: http://localhost:8083
+          uri: ${MS_LANCAMENTOS_URL:http://localhost:8083}
           predicates:
             - Path=/lancamentos/**
 
         - id: ms-centro-custo
-          uri: http://localhost:8082
+          uri: ${MS_CENTRO_CUSTO_URL:http://localhost:8082}
           predicates:
             - Path=/centros-custo/**
 
         - id: ms-fluxo-caixa
-          uri: http://localhost:8084
+          uri: ${MS_FLUXO_CAIXA_URL:http://localhost:8084}
           predicates:
             - Path=/fluxo-caixa/**
 
