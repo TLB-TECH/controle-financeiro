@@ -13,4 +13,4 @@ jwt:
   expiration: ${JWT_EXPIRATION:86400000}
 
 ms-lancamentos:
-  url: http://localhost:8083
+  url: ${MS_LANCAMENTOS_URL:http://localhost:8083}
