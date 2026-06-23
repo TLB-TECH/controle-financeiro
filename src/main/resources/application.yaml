@@ -1,3 +1,37 @@
 spring:
   application:
     name: ms-notificacao
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/CF_notificacao}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:'0502'}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
+server:
+  port: 8086
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+sendgrid:
+  api-key: ${SENDGRID_API_KEY}
+  from-email: ${SENDGRID_FROM_EMAIL:noreply@tlbtech.com}
+  from-name: TLB Tech Financeiro
+
+evolution:
+  api-url: ${EVOLUTION_API_URL}
+  api-key: ${EVOLUTION_API_KEY}
+  instance: ${EVOLUTION_INSTANCE}
+
+internal:
+  secret: ${INTERNAL_SECRET:internal-secret-financeiro-2026}
