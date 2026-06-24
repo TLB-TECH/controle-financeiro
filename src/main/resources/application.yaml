@@ -35,3 +35,6 @@ evolution:
 
 internal:
   secret: ${INTERNAL_SECRET:internal-secret-financeiro-2026}
+
+ms-lancamentos:
+  url: ${MS_LANCAMENTOS_URL:http://localhost:8083}
