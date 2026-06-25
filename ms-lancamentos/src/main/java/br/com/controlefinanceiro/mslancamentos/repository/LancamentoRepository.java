@@ -6,8 +6,10 @@ import br.com.controlefinanceiro.mslancamentos.enums.TipoLancamento;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
 
 @Repository
 public interface LancamentoRepository extends JpaRepository<Lancamento, Long> {
@@ -19,6 +21,8 @@ public interface LancamentoRepository extends JpaRepository<Lancamento, Long> {
     List<Lancamento> findByUsuarioIdAndStatusAndAtivoTrue(String usuarioId, StatusLancamento status);
 
     List<Lancamento> findByUsuarioIdAndDescricaoContainingIgnoreCaseAndAtivoTrue(String usuarioId, String descricao);
+
+    List<Lancamento> findByDataVencimentoAndStatusAndAtivoTrue(LocalDate dataVencimento, StatusLancamento status);
 
     Optional<Lancamento> findByIdAndAtivoTrue(Long id);
 
