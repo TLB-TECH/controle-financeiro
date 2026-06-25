@@ -42,5 +42,5 @@ logging:
     root: INFO
     br.com.controlefinanceiro: DEBUG
 
-    internal:
-      secret: ${INTERNAL_SECRET:internal-secret-financeiro-2026}
+internal:
+  secret: ${INTERNAL_SECRET:internal-secret-financeiro-2026}
