@@ -15,6 +15,17 @@ spring:
   cloud:
     compatibility-verifier:
       enabled: false
+  mail:
+    host: smtp.sendgrid.net
+    port: 587
+    username: apikey
+    password: ${SENDGRID_API_KEY}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 server:
   port: 8086
@@ -24,7 +35,6 @@ jwt:
   expiration: ${JWT_EXPIRATION:86400000}
 
 sendgrid:
-  api-key: ${SENDGRID_API_KEY}
   from-email: ${SENDGRID_FROM_EMAIL:noreply@tlbtech.com}
   from-name: TLB Tech Financeiro
 
@@ -35,3 +45,6 @@ evolution:
 
 internal:
   secret: ${INTERNAL_SECRET:internal-secret-financeiro-2026}
+
+ms-lancamentos:
+  url: ${MS_LANCAMENTOS_URL:http://localhost:8083}
