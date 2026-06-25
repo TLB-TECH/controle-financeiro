@@ -4,6 +4,7 @@ import br.com.controlefinanceiro.mslancamentos.client.CentroCustoClient;
 import br.com.controlefinanceiro.mslancamentos.dto.EfetivarRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoResponseDTO;
+import br.com.controlefinanceiro.mslancamentos.dto.LancamentoVencimentoDTO;
 import br.com.controlefinanceiro.mslancamentos.entity.Lancamento;
 import br.com.controlefinanceiro.mslancamentos.enums.StatusLancamento;
 import br.com.controlefinanceiro.mslancamentos.enums.TipoLancamento;
@@ -178,5 +179,19 @@ public class LancamentoService {
         lancamento.setStatus(StatusLancamento.EFETIVADO);
         lancamento.setDataPagamento(dto.dataPagamento() != null ? dto.dataPagamento() : LocalDate.now());
         return LancamentoResponseDTO.fromEntity(lancamentoRepository.save(lancamento));
+    }
+
+    public List<LancamentoVencimentoDTO> buscarVencendoHoje() {
+        return lancamentoRepository
+                .findByDataVencimentoAndStatusAndAtivoTrue(LocalDate.now(), StatusLancamento.PENDENTE)
+                .stream()
+                .map(l -> new LancamentoVencimentoDTO(
+                        l.getId(),
+                        l.getDescricao(),
+                        l.getValor(),
+                        l.getDataVencimento(),
+                        l.getUsuarioId()
+                ))
+                .toList();
     }
 }
