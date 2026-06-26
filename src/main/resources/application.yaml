@@ -43,6 +43,9 @@ evolution:
   api-key: ${EVOLUTION_API_KEY}
   instance: ${EVOLUTION_INSTANCE}
 
+whatsapp:
+  enabled: false
+
 internal:
   secret: ${INTERNAL_SECRET:internal-secret-financeiro-2026}
 
