@@ -13,18 +13,26 @@ import java.util.Map;
 @Slf4j
 public class WhatsAppService {
 
-    @Value("${evolution.api-url}")
+    @Value("${evolution.api-url:http://localhost:8089}")
     private String apiUrl;
 
-    @Value("${evolution.api-key}")
+    @Value("${evolution.api-key:}")
     private String apiKey;
 
-    @Value("${evolution.instance}")
+    @Value("${evolution.instance:financeiro}")
     private String instance;
+
+    @Value("${whatsapp.enabled:false}")
+    private boolean enabled;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
     public void enviar(String telefone, String mensagem) {
+        if (!enabled) {
+            log.info("[MOCK] WhatsApp para {}: {}", telefone, mensagem);
+            return;
+        }
+
         try {
             String url = apiUrl + "/message/sendText/" + instance;
 
