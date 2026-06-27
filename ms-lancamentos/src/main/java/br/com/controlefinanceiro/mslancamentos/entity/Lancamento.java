@@ -73,10 +73,19 @@ public class Lancamento {
     @Builder.Default
     private Integer numeroParcelas = 1;
 
+    @Column(name = "parcela_numero")
+    private Integer parcelaNumero;
+
+    @Column(name = "grupo_parcela_id", length = 36)
+    private String grupoParcelaId;
+
     private String observacao;
 
     @Column(name = "centro_custo_id")
     private Long centroCustoId;
+
+    @Column(name = "cartao_credito_id")
+    private Long cartaoCreditoId;
 
     @Column(nullable = false)
     private Boolean ativo;
