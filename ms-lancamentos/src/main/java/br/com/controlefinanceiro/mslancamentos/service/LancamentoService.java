@@ -2,30 +2,39 @@ package br.com.controlefinanceiro.mslancamentos.service;
 
 import br.com.controlefinanceiro.mslancamentos.client.CentroCustoClient;
 import br.com.controlefinanceiro.mslancamentos.dto.EfetivarRequestDTO;
+import br.com.controlefinanceiro.mslancamentos.dto.LancamentoParceladoRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoResponseDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoVencimentoDTO;
+import br.com.controlefinanceiro.mslancamentos.entity.CartaoCredito;
 import br.com.controlefinanceiro.mslancamentos.entity.Lancamento;
+import br.com.controlefinanceiro.mslancamentos.enums.FormaPagamento;
 import br.com.controlefinanceiro.mslancamentos.enums.StatusLancamento;
 import br.com.controlefinanceiro.mslancamentos.enums.TipoLancamento;
 import br.com.controlefinanceiro.mslancamentos.exception.LancamentoNaoAutorizadoException;
 import br.com.controlefinanceiro.mslancamentos.exception.LancamentoNaoEncontradoException;
+import br.com.controlefinanceiro.mslancamentos.repository.CartaoCreditoRepository;
 import br.com.controlefinanceiro.mslancamentos.repository.LancamentoRepository;
 import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class LancamentoService {
 
     private final LancamentoRepository lancamentoRepository;
+    private final CartaoCreditoRepository cartaoCreditoRepository;
     private final CentroCustoClient centroCustoClient;
     private final HttpServletRequest request;
 
@@ -75,6 +84,59 @@ public class LancamentoService {
                 .build();
 
         return LancamentoResponseDTO.fromEntity(lancamentoRepository.save(lancamento));
+    }
+
+    @Transactional
+    public List<LancamentoResponseDTO> criarParcelado(LancamentoParceladoRequestDTO dto) {
+        String email = getEmailAutenticado();
+
+        if (dto.formaPagamento() == FormaPagamento.CARTAO_CREDITO) {
+            if (dto.cartaoCreditoId() == null) {
+                throw new LancamentoNaoAutorizadoException("Cartão de crédito é obrigatório para esta forma de pagamento");
+            }
+            cartaoCreditoRepository
+                    .findByIdAndUsuarioIdAndAtivoTrue(dto.cartaoCreditoId(), email)
+                    .orElseThrow(() -> new LancamentoNaoEncontradoException("Cartão de crédito não encontrado"));
+        }
+
+        validarCentroCusto(dto.centroCustoId());
+
+        String grupoParcelaId = UUID.randomUUID().toString();
+        LocalDate dataInicio = dto.dataInicio() != null ? dto.dataInicio() : LocalDate.now();
+
+        BigDecimal valorParcela = dto.valorTotal()
+                .divide(BigDecimal.valueOf(dto.numeroParcelas()), 2, RoundingMode.DOWN);
+        BigDecimal resto = dto.valorTotal()
+                .subtract(valorParcela.multiply(BigDecimal.valueOf(dto.numeroParcelas())));
+
+        List<Lancamento> lancamentos = new ArrayList<>();
+
+        for (int i = 1; i <= dto.numeroParcelas(); i++) {
+            BigDecimal valorAtual = (i == dto.numeroParcelas())
+                    ? valorParcela.add(resto)
+                    : valorParcela;
+
+            Lancamento lancamento = Lancamento.builder()
+                    .descricao(dto.descricao() + " (" + i + "/" + dto.numeroParcelas() + ")")
+                    .valorOriginal(valorAtual)
+                    .valor(valorAtual)
+                    .tipo(TipoLancamento.DESPESA)
+                    .formaPagamento(dto.formaPagamento())
+                    .cartaoCreditoId(dto.cartaoCreditoId())
+                    .numeroParcelas(dto.numeroParcelas())
+                    .parcelaNumero(i)
+                    .grupoParcelaId(grupoParcelaId)
+                    .dataLancamento(LocalDate.now())
+                    .dataVencimento(dataInicio.plusMonths(i - 1))
+                    .observacao(dto.observacao())
+                    .centroCustoId(dto.centroCustoId())
+                    .usuarioId(email)
+                    .build();
+
+            lancamentos.add(lancamentoRepository.save(lancamento));
+        }
+
+        return lancamentos.stream().map(LancamentoResponseDTO::fromEntity).toList();
     }
 
     public List<LancamentoResponseDTO> listar() {

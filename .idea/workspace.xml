@@ -5,14 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d6010007-05c2-4fe2-95ac-052a25686529" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ms-usuarios/src/main/java/br/com/controlefinanceiro/msusuarios/exception/CredenciaisInvalidasException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ms-usuarios/src/main/java/br/com/controlefinanceiro/msusuarios/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ms-usuarios/src/main/java/br/com/controlefinanceiro/msusuarios/controller/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ms-usuarios/src/main/java/br/com/controlefinanceiro/msusuarios/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/ms-usuarios/src/main/java/br/com/controlefinanceiro/msusuarios/exception/GlobalExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ms-usuarios/src/main/java/br/com/controlefinanceiro/msusuarios/security/JwtFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/ms-usuarios/src/main/java/br/com/controlefinanceiro/msusuarios/security/JwtFilter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ms-usuarios/src/main/java/br/com/controlefinanceiro/msusuarios/security/JwtService.java" beforeDir="false" afterPath="$PROJECT_DIR$/ms-usuarios/src/main/java/br/com/controlefinanceiro/msusuarios/security/JwtService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ms-usuarios/src/main/java/br/com/controlefinanceiro/msusuarios/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/ms-usuarios/src/main/java/br/com/controlefinanceiro/msusuarios/security/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ms-usuarios/src/main/java/br/com/controlefinanceiro/msusuarios/service/UsuarioService.java" beforeDir="false" afterPath="$PROJECT_DIR$/ms-usuarios/src/main/java/br/com/controlefinanceiro/msusuarios/service/UsuarioService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/~$NTRO~1.docx" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,12 +31,12 @@
     &quot;assignee&quot;: &quot;Taciolb&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Taciolb/controle-financeiro",
-    "accountId": "71d8ac0c-d5d0-4232-b9d4-3494b2e1f2c4"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Taciolb/controle-financeiro&quot;,
+    &quot;accountId&quot;: &quot;71d8ac0c-d5d0-4232-b9d4-3494b2e1f2c4&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
 }</component>
@@ -57,7 +52,7 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feature/jwt-autenticacao",
+    "git-widget-placeholder": "feature/ms-lancamentos",
     "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "C:/Users/tacio/Desktop/TLB TECH/Controle Financeiro",
     "settings.editor.selected.configurable": "preferences.pluginManager"

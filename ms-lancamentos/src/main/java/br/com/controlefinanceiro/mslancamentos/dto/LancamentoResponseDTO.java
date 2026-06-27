@@ -22,6 +22,9 @@ public record LancamentoResponseDTO(
         TipoLancamento tipo,
         FormaPagamento formaPagamento,
         Integer numeroParcelas,
+        Integer parcelaNumero,
+        String grupoParcelaId,
+        Long cartaoCreditoId,
         StatusLancamento status,
         LocalDate dataLancamento,
         LocalDate dataVencimento,
@@ -33,28 +36,31 @@ public record LancamentoResponseDTO(
         LocalDateTime atualizadoEm
 ) {
 
-    public static LancamentoResponseDTO fromEntity(Lancamento lancamento) {
+    public static LancamentoResponseDTO fromEntity(Lancamento l) {
         return new LancamentoResponseDTO(
-                lancamento.getId(),
-                lancamento.getDescricao(),
-                lancamento.getValorOriginal(),
-                lancamento.getTaxaJuros(),
-                lancamento.getTipoJuros(),
-                lancamento.getJuros(),
-                lancamento.getDesconto(),
-                lancamento.getValor(),
-                lancamento.getTipo(),
-                lancamento.getFormaPagamento(),
-                lancamento.getNumeroParcelas(),
-                lancamento.getStatus(),
-                lancamento.getDataLancamento(),
-                lancamento.getDataVencimento(),
-                lancamento.getDataPagamento(),
-                lancamento.getObservacao(),
-                lancamento.getCentroCustoId(),
-                lancamento.getAtivo(),
-                lancamento.getCriadoEm(),
-                lancamento.getAtualizadoEm()
+                l.getId(),
+                l.getDescricao(),
+                l.getValorOriginal(),
+                l.getTaxaJuros(),
+                l.getTipoJuros(),
+                l.getJuros(),
+                l.getDesconto(),
+                l.getValor(),
+                l.getTipo(),
+                l.getFormaPagamento(),
+                l.getNumeroParcelas(),
+                l.getParcelaNumero(),
+                l.getGrupoParcelaId(),
+                l.getCartaoCreditoId(),
+                l.getStatus(),
+                l.getDataLancamento(),
+                l.getDataVencimento(),
+                l.getDataPagamento(),
+                l.getObservacao(),
+                l.getCentroCustoId(),
+                l.getAtivo(),
+                l.getCriadoEm(),
+                l.getAtualizadoEm()
         );
     }
 }
