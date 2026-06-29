@@ -1,197 +1,206 @@
-# 💰 Controle Financeiro Pessoal
+# Controle Financeiro Pessoal
 
-> Aplicação de controle financeiro pessoal desenvolvida com arquitetura de microsserviços, utilizando Java + Spring Boot, Angular e Docker.
+Sistema de controle financeiro pessoal construído com arquitetura de microsserviços. Permite gerenciar lançamentos, centros de custo, fluxo de caixa e receber notificações por e-mail e WhatsApp sobre vencimentos.
 
-![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=java)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen?style=flat-square&logo=springboot)
-![Angular](https://img.shields.io/badge/Angular-19-red?style=flat-square&logo=angular)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?style=flat-square&logo=postgresql)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker)
-![Status](https://img.shields.io/badge/Status-Em%20desenvolvimento-yellow?style=flat-square)
-
----
-
-## 📋 Sobre o Projeto
-
-Aplicação full-stack para controle de finanças pessoais, com foco em **aprendizado de arquitetura distribuída** e construção de **portfólio profissional**.
-
-O projeto foi desenvolvido seguindo boas práticas de mercado: microsserviços independentes, comunicação via REST, autenticação JWT centralizada no API Gateway, resiliência com Resilience4j e orquestração com Docker Compose.
-
----
-
-## 🏗️ Arquitetura
+## Arquitetura
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                  Angular (4200)                      │
-└──────────────────────┬──────────────────────────────┘
-                       │
-┌──────────────────────▼──────────────────────────────┐
-│         API Gateway — Spring Cloud Gateway (8080)    │
-│              JWT Validation · Rate Limiting          │
-└──┬───────────────┬──────────────┬───────────────┬───┘
-   │               │              │               │
-┌──▼───┐      ┌───▼──┐      ┌───▼──┐      ┌────▼──────┐
-│ BFF  │      │  ms- │      │  ms- │      │    ms-    │
-│(8085)│      │usu.  │      │c.c.  │      │lanc.(8083)│
-│      │      │(8081)│      │(8082)│      └───────────┘
-│agrega│      └──────┘      └──────┘
-│dados │      db_usuarios   db_centro      db_lanc.
-│      │
-│  ├──→ ms-usuarios
-│  ├──→ ms-lancamentos        ┌──────────────────┐
-│  └──→ ms-fluxo-caixa ──────►│ ms-fluxo-caixa   │
-│                             │     (8084)        │
-└─────────────────────────────│  Resilience4j     │
-                              │  Circuit Breaker  │
-                              └──────────────────┘
-                                   db_fluxocaixa
+                        [ Frontend Angular ]
+                               |
+                        [ API Gateway :8080 ]
+                      /    |      |      \
+              ms-usuarios  ms-lancamentos  ms-centro-custo  ms-fluxo-caixa
+               :8081          :8083            :8082            :8084
+                                |
+                         bff-financeiro
+                             :8085
+                                |
+                         ms-notificacao
+                             :8086
+                                |
+                         Evolution API (WhatsApp)
+                             :8089
 ```
 
-### Por que essa arquitetura?
+## Repositórios
 
-| Decisão | Motivo |
+| Repositório | Descrição |
 |---|---|
-| Microsserviços | Escalabilidade independente por domínio |
-| API Gateway | Ponto único de entrada, JWT centralizado |
-| BFF | Agrega dados complexos para o frontend |
-| Resilience4j | Evita falhas em cascata entre serviços |
-| Um banco por serviço | Isolamento de dados, sem acoplamento |
+| [controle-financeiro](https://github.com/TLB-TECH/controle-financeiro) | Monorepo (ms-lancamentos, ms-usuarios) |
+| [ms-api-gateway](https://github.com/TLB-TECH/ms-api-gateway) | API Gateway |
+| [bff-financeiro](https://github.com/TLB-TECH/bff-financeiro) | Backend for Frontend |
+| [ms-centro-custo](https://github.com/TLB-TECH/ms-centro-custo) | Microsserviço de centros de custo |
+| [ms-fluxo-caixa](https://github.com/TLB-TECH/ms-fluxo-caixa) | Microsserviço de fluxo de caixa |
+| [ms-notificacao](https://github.com/TLB-TECH/ms-notificacao) | Microsserviço de notificações |
+| [controle-financeiro-infra](https://github.com/TLB-TECH/controle-financeiro-infra) | Infraestrutura Docker |
+| [controle-financeiro-usuario-front](https://github.com/TLB-TECH/controle-financeiro-usuario-front) | Frontend Angular |
 
----
+## Microsserviços
 
-## 🛠️ Stack Tecnológica
+### API Gateway — porta 8080
+Ponto de entrada único da aplicação. Roteia as requisições para os microsserviços e valida o token JWT.
 
-| Camada | Tecnologia |
+| Rota | Destino |
 |---|---|
-| Backend | Java 17 + Spring Boot 3.x |
-| API Gateway | Spring Cloud Gateway |
-| Comunicação | REST + OpenFeign |
-| Resiliência | Resilience4j (Circuit Breaker, Retry, Timeout) |
-| Autenticação | JWT + Spring Security |
-| Banco de Dados | PostgreSQL 16 |
-| Frontend | Angular 19 |
-| Orquestração | Docker + Docker Compose |
-| Documentação | Swagger / OpenAPI 3 |
-| Testes | JUnit 5 + Mockito |
-| CI/CD | GitHub Actions (em breve) |
+| `/auth/**`, `/usuarios/**` | ms-usuarios |
+| `/lancamentos/**` | ms-lancamentos |
+| `/centros-custo/**` | ms-centro-custo |
+| `/fluxo-caixa/**` | ms-fluxo-caixa |
 
----
+### ms-usuarios — porta 8081
+Gerencia autenticação e cadastro de usuários. Emite tokens JWT usados por todos os demais serviços.
 
-## 📦 Estrutura do Projeto
+**Endpoints:**
+- `POST /auth/login` — autenticação
+- `POST /usuarios` — cadastro de usuário
+- `GET /usuarios/{id}` — busca usuário
 
-```
-financeiro/
-├── docker-compose.yml
-├── api-gateway/             # Spring Cloud Gateway — porta 8080
-├── bff-financeiro/          # Backend for Frontend — porta 8085
-├── ms-usuarios/             # Microsserviço de Usuários — porta 8081
-├── ms-centro-custo/         # Microsserviço de Centro de Custo — porta 8082
-├── ms-lancamentos/          # Microsserviço de Lançamentos — porta 8083
-├── ms-fluxo-caixa/          # Microsserviço de Fluxo de Caixa — porta 8084
-└── frontend-financeiro/     # Aplicação Angular — porta 4200
-```
+### ms-centro-custo — porta 8082
+Gerencia os centros de custo vinculados ao usuário.
 
----
+**Endpoints:**
+- `POST /centros-custo`
+- `GET /centros-custo`
+- `PUT /centros-custo/{id}`
+- `DELETE /centros-custo/{id}`
 
-## 📋 Módulos
+### ms-lancamentos — porta 8083
+Principal microsserviço do sistema. Gerencia lançamentos financeiros com suporte a parcelamentos e cartão de crédito.
 
-### 👤 ms-usuarios (8081)
-- Cadastro e autenticação de usuários
-- Geração e validação de tokens JWT
-- CRUD completo de usuários
+**Funcionalidades:**
+- Lançamentos de receita e despesa
+- Formas de pagamento: cartão de crédito, boleto, dinheiro, PIX, transferência
+- Lançamentos parcelados (boleto e cartão)
+- Efetivação de lançamentos pendentes
+- Tipos de juros configuráveis
+- Endpoint interno para notificações de vencimento
 
-### 🗂️ ms-centro-custo (8082)
-- Cadastro de centros de custo
-- CRUD completo
-- Vinculação com lançamentos
+**Endpoints:**
+- `POST /lancamentos` — criar lançamento
+- `GET /lancamentos` — listar lançamentos do usuário
+- `PUT /lancamentos/{id}` — atualizar
+- `DELETE /lancamentos/{id}` — excluir
+- `POST /lancamentos/{id}/efetivar` — efetivar lançamento
+- `POST /lancamentos/parcelados` — criar lançamento parcelado
+- `POST /cartoes` — cadastrar cartão de crédito
+- `GET /cartoes` — listar cartões
 
-### 💸 ms-lancamentos (8083)
-- Registro de receitas e despesas
-- CRUD completo com filtros por período e categoria
-- Vinculação com centros de custo
+### ms-fluxo-caixa — porta 8084
+Consolida os lançamentos e apresenta o fluxo de caixa por período.
 
-### 📊 ms-fluxo-caixa (8084)
-- Relatórios financeiros consolidados
-- Extrato por período
-- Saldo atual e projeções
-- Consome `ms-lancamentos` e `ms-centro-custo` via OpenFeign + Resilience4j
+**Endpoints:**
+- `GET /fluxo-caixa` — fluxo de caixa por período
 
----
+### bff-financeiro — porta 8085
+Backend for Frontend. Agrega dados de múltiplos microsserviços em uma única chamada para o frontend.
 
-## 🚀 Como Executar
+**Endpoints:**
+- `GET /bff/dashboard` — retorna lançamentos, centros de custo e fluxo de caixa consolidados
 
-### Pré-requisitos
-- Docker e Docker Compose instalados
-- Java 17+
-- Node.js 18+ (para o frontend)
+### ms-notificacao — porta 8086
+Envia notificações de lançamentos vencendo por e-mail (SendGrid) e WhatsApp (Evolution API). Possui scheduler que verifica diariamente os vencimentos.
 
-### Subindo o projeto completo
+**Funcionalidades:**
+- Notificação por e-mail via SendGrid
+- Notificação por WhatsApp via Evolution API (ativação via flag `whatsapp.enabled`)
+- Preferências de notificação por usuário (e-mail, WhatsApp ou ambos)
+- Scheduler automático de alertas de vencimento
 
+**Endpoints:**
+- `POST /notificacoes/preferencias` — configurar preferências
+- `GET /notificacoes/preferencias` — consultar preferências
+
+## Frontend — Angular
+
+Aplicação Angular com as seguintes telas:
+
+| Tela | Rota |
+|---|---|
+| Login | `/login` |
+| Cadastro | `/register` |
+| Dashboard | `/dashboard` |
+| Lançamentos | `/lancamentos` |
+| Centro de Custo | `/centro-custo` |
+
+Guards de autenticação e interceptor HTTP para envio automático do token JWT.
+
+## Infraestrutura
+
+Toda a infraestrutura está definida no repositório [controle-financeiro-infra](https://github.com/TLB-TECH/controle-financeiro-infra) via Docker Compose.
+
+### Bancos de dados (PostgreSQL 15)
+
+| Container | Banco | Porta |
+|---|---|---|
+| postgres-usuarios | CF_usuarios | 5433 |
+| postgres-centrocusto | CF_centrocusto | 5434 |
+| postgres-lancamentos | CF_lancamentos | 5435 |
+| postgres-notificacao | CF_notificacao | 5436 |
+| postgres-evolution | evolution | 5437 |
+
+### Como subir o ambiente
+
+**1. Clone a infraestrutura:**
 ```bash
-# Clone o repositório
-git clone https://github.com/Taciolb/financeiro.git
-cd financeiro
-
-# Sobe todos os serviços
-docker compose up -d
-
-# Acompanha os logs
-docker compose logs -f
+git clone https://github.com/TLB-TECH/controle-financeiro-infra.git
+cd controle-financeiro-infra
 ```
 
-### Serviços disponíveis após o start
-
-| Serviço | URL |
-|---|---|
-| Frontend Angular | http://localhost:4200 |
-| API Gateway | http://localhost:8080 |
-| BFF | http://localhost:8085 |
-| ms-usuarios | http://localhost:8081/swagger-ui.html |
-| ms-centro-custo | http://localhost:8082/swagger-ui.html |
-| ms-lancamentos | http://localhost:8083/swagger-ui.html |
-| ms-fluxo-caixa | http://localhost:8084/swagger-ui.html |
-
----
-
-## 🗺️ Roadmap
-
-- [x] Definição da arquitetura
-- [x] Configuração dos bancos de dados
-- [x] Criação dos projetos Spring Boot
-- [ ] ms-usuarios — CRUD + JWT
-- [ ] ms-centro-custo — CRUD
-- [ ] ms-lancamentos — CRUD
-- [ ] ms-fluxo-caixa — Relatórios + Resilience4j
-- [ ] BFF — Agregação de dados
-- [ ] API Gateway — Roteamento + Segurança
-- [ ] Docker Compose — Orquestração completa
-- [ ] Frontend Angular
-- [ ] CI/CD com GitHub Actions
-
----
-
-## 🧪 Testes
-
+**2. Configure as variáveis de ambiente:**
 ```bash
-# Roda os testes de um microsserviço
-cd ms-usuarios
-./mvnw test
-
-# Roda com relatório de cobertura
-./mvnw test jacoco:report
+cp .env.example .env
+# Edite o .env com suas credenciais
 ```
 
-Meta de cobertura: **80%+**
+**3. Suba os containers:**
+```bash
+docker-compose up -d
+```
 
----
+### Variáveis de ambiente (.env)
 
-## 👨‍💻 Autor
+```env
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=sua_senha
 
-**Tacio** — [@Taciolb](https://github.com/Taciolb)
+JWT_SECRET=seu_jwt_secret
+JWT_EXPIRATION=86400000
 
----
+INTERNAL_SECRET=internal-secret-financeiro-2026
 
-## 📄 Licença
+# SendGrid (e-mail)
+SENDGRID_API_KEY=sua_chave
+SENDGRID_FROM_EMAIL=seu@email.com
 
-Este projeto está sob a licença MIT.
+# Evolution API (WhatsApp)
+EVOLUTION_API_URL=http://evolution-api:8080
+EVOLUTION_API_KEY=sua_chave
+EVOLUTION_INSTANCE=sua_instancia
+```
+
+## Tecnologias
+
+**Backend:**
+- Java 17 + Spring Boot 3
+- Spring Cloud Gateway
+- Spring Security + JWT
+- Spring Data JPA + Flyway
+- PostgreSQL 15
+- OpenFeign (comunicação entre microsserviços)
+- SpringDoc (Swagger)
+
+**Frontend:**
+- Angular 17+
+- TypeScript
+
+**Infraestrutura:**
+- Docker + Docker Compose
+- Evolution API v2 (WhatsApp)
+- SendGrid (e-mail)
+
+## Documentação da API
+
+Cada microsserviço expõe o Swagger UI em:
+```
+http://localhost:{porta}/swagger-ui.html
+```
