@@ -4,7 +4,7 @@ spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/CF_notificacao}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:'0502'}
+    password: ${SPRING_DATASOURCE_PASSWORD:xxxx}
   jpa:
     hibernate:
       ddl-auto: validate
