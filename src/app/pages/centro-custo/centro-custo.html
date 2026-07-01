@@ -1,1 +1,119 @@
-<p>centro-custo works!</p>
+<div class="page-wrapper">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <img src="assets/logo-tlbtech.jpeg" alt="TLB TECH" class="logo-img">
+    </div>
+    <ul class="sidebar-nav">
+      <li>
+        <a routerLink="/dashboard" class="nav-item">
+          <mat-icon>dashboard</mat-icon>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/lancamentos" class="nav-item">
+          <mat-icon>receipt_long</mat-icon>
+          <span>Lançamentos</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/centro-custo" class="nav-item active">
+          <mat-icon>category</mat-icon>
+          <span>Centro de Custo</span>
+        </a>
+      </li>
+    </ul>
+    <button class="nav-item logout-btn" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Sair</span>
+    </button>
+  </nav>
+
+  <!-- Conteúdo Principal -->
+  <main class="main-content">
+
+    <div class="page-header">
+      <h1 class="page-title">Centro de Custo</h1>
+      <button class="tlb-btn-primary" (click)="abrirNovo()">
+        <mat-icon>add</mat-icon>
+        Novo
+      </button>
+    </div>
+
+    <!-- Formulário Inline -->
+    @if (mostrarFormulario) {
+      <div class="form-card tlb-card">
+        <h2 class="form-title">{{ editandoId ? 'Editar' : 'Novo' }} Centro de Custo</h2>
+        <form [formGroup]="form" (ngSubmit)="salvar()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nome</mat-label>
+            <input matInput formControlName="nome" placeholder="Ex: Marketing, TI, Operações...">
+            @if (form.get('nome')?.invalid && form.get('nome')?.touched) {
+              <mat-error>Nome é obrigatório (mínimo 2 caracteres)</mat-error>
+            }
+          </mat-form-field>
+          <div class="form-actions">
+            <button type="button" mat-stroked-button (click)="fecharFormulario()">Cancelar</button>
+            <button type="submit" class="tlb-btn-primary" [disabled]="form.invalid || salvando">
+              {{ salvando ? 'Salvando...' : (editandoId ? 'Atualizar' : 'Salvar') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+
+    <!-- Tabela -->
+    <div class="table-card tlb-card">
+
+      @if (carregando) {
+        <div class="loading-state">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      } @else if (centros.length === 0) {
+        <div class="empty-state">
+          <mat-icon>category</mat-icon>
+          <p>Nenhum centro de custo cadastrado.</p>
+          <button class="tlb-btn-primary" (click)="abrirNovo()">Cadastrar agora</button>
+        </div>
+      } @else {
+        <table mat-table [dataSource]="centros" class="centros-table">
+
+          <ng-container matColumnDef="nome">
+            <th mat-header-cell *matHeaderCellDef>Nome</th>
+            <td mat-cell *matCellDef="let centro">{{ centro.nome }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef>Ações</th>
+            <td mat-cell *matCellDef="let centro">
+              @if (confirmarExclusaoId === centro.id) {
+                <span class="confirm-delete">
+                  <span class="confirm-text">Confirmar exclusão?</span>
+                  <button mat-icon-button color="warn" (click)="excluir(centro.id)" title="Confirmar">
+                    <mat-icon>check</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="cancelarExclusao()" title="Cancelar">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </span>
+              } @else {
+                <button mat-icon-button (click)="editar(centro)" title="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="pedirConfirmacao(centro.id!)" title="Excluir">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+          <tr mat-row *matRowDef="let row; columns: colunas;"></tr>
+        </table>
+      }
+
+    </div>
+  </main>
+</div>

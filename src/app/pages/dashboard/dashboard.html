@@ -1,1 +1,143 @@
-<p>dashboard works!</p>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 60 50" class="logo-v" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="0,0 30,45 60,0" fill="none" stroke="#ffffff" stroke-width="3" stroke-linejoin="round"/>
+      </svg>
+      <span class="logo-texto">TLB TECH</span>
+      <div class="logo-linha"></div>
+      <span class="logo-sub">CONTROLE FINANCEIRO</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/dashboard" routerLinkActive="ativo" class="nav-item">
+        <mat-icon>dashboard</mat-icon>
+        <span>Dashboard</span>
+      </a>
+      <a routerLink="/lancamentos" routerLinkActive="ativo" class="nav-item">
+        <mat-icon>swap_vert</mat-icon>
+        <span>Lançamentos</span>
+      </a>
+      <a routerLink="/centro-custo" routerLinkActive="ativo" class="nav-item">
+        <mat-icon>category</mat-icon>
+        <span>Centro de Custo</span>
+      </a>
+
+      <div class="nav-divisor">
+        <span>RELATÓRIOS</span>
+      </div>
+
+      <a routerLink="/fluxo-caixa" routerLinkActive="ativo" class="nav-item">
+        <mat-icon>trending_up</mat-icon>
+        <span>Fluxo de Caixa</span>
+      </a>
+      <a routerLink="/relatorios" routerLinkActive="ativo" class="nav-item">
+        <mat-icon>bar_chart</mat-icon>
+        <span>Relatórios</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar">{{ nomeUsuario[0]?.toUpperCase() }}</div>
+      <div class="footer-info">
+        <span class="footer-nome">{{ nomeUsuario }}</span>
+      </div>
+      <button mat-icon-button (click)="logout()" class="btn-logout" title="Sair">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- CONTEÚDO -->
+  <main class="conteudo">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div>
+        <h1 class="pagina-titulo">Dashboard</h1>
+        <p class="pagina-sub">Visão geral das suas finanças</p>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-area" *ngIf="carregando">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+
+    <div class="erro-msg" *ngIf="erro">{{ erro }}</div>
+
+    <ng-container *ngIf="resumo && !carregando">
+
+      <!-- Cards -->
+      <div class="cards-resumo">
+        <div class="card-resumo card-saldo">
+          <div class="card-icone"><mat-icon>account_balance_wallet</mat-icon></div>
+          <div class="card-info">
+            <span class="card-label">Saldo</span>
+            <span class="card-valor">{{ formatarValor(resumo.fluxoCaixa.saldo) }}</span>
+          </div>
+        </div>
+        <div class="card-resumo card-receita">
+          <div class="card-icone"><mat-icon>trending_up</mat-icon></div>
+          <div class="card-info">
+            <span class="card-label">Receitas</span>
+            <span class="card-valor">{{ formatarValor(resumo.fluxoCaixa.totalEntradas) }}</span>
+          </div>
+        </div>
+        <div class="card-resumo card-despesa">
+          <div class="card-icone"><mat-icon>trending_down</mat-icon></div>
+          <div class="card-info">
+            <span class="card-label">Despesas</span>
+            <span class="card-valor">{{ formatarValor(resumo.fluxoCaixa.totalSaidas) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráficos -->
+      <div class="graficos-row">
+        <div class="grafico-card">
+          <h3 class="grafico-titulo">Receitas vs Despesas</h3>
+          <div class="grafico-area">
+            <canvas #barrasChart></canvas>
+          </div>
+        </div>
+        <div class="grafico-card">
+          <h3 class="grafico-titulo">Por Categoria</h3>
+          <div class="grafico-area">
+            <canvas #pizzaChart></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lançamentos -->
+      <div class="lancamentos-card">
+        <h3 class="grafico-titulo">Últimos Lançamentos</h3>
+
+        <div class="lancamentos-lista" *ngIf="resumo.lancamentos?.length; else vazio">
+          <div class="lancamento-item" *ngFor="let l of resumo.lancamentos">
+            <div class="lancamento-info">
+              <span class="lancamento-descricao">{{ l.descricao }}</span>
+              <span class="lancamento-categoria">{{ l.centroCustoNome }}</span>
+            </div>
+            <div class="lancamento-direita">
+              <span class="lancamento-valor" [class.receita]="l.tipo === 'RECEITA'" [class.despesa]="l.tipo === 'DESPESA'">
+                {{ l.tipo === 'RECEITA' ? '+' : '-' }} {{ formatarValor(l.valor) }}
+              </span>
+              <span class="lancamento-data">{{ l.data | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #vazio>
+          <div class="vazio-msg">Nenhum lançamento encontrado.</div>
+        </ng-template>
+      </div>
+
+    </ng-container>
+
+  </main>
+</div>
