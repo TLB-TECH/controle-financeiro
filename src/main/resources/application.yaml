@@ -5,6 +5,19 @@ spring:
     compatibility-verifier:
       enabled: false
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
       routes:
         - id: ms-usuarios
           uri: ${MS_USUARIOS_URL:http://localhost:8081}
