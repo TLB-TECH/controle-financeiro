@@ -4,80 +4,6 @@
   background: var(--cor-fundo);
 }
 
-// ---- Sidebar ----
-.sidebar {
-  width: 240px;
-  min-height: 100vh;
-  background: #0a1929;
-  display: flex;
-  flex-direction: column;
-  padding: 24px 0;
-  border-right: 1px solid rgba(0, 200, 240, 0.1);
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 100;
-}
-
-.sidebar-logo {
-  padding: 12px 16px 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-bottom: 1px solid rgba(0, 200, 240, 0.08);
-  margin-bottom: 8px;
-}
-
-.logo-img {
-  width: 130px;
-  object-fit: contain;
-}
-
-.sidebar-nav {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  flex: 1;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 24px;
-  color: #4a7a9b;
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-  cursor: pointer;
-  width: 100%;
-  background: none;
-  border: none;
-  text-align: left;
-
-  mat-icon {
-    font-size: 1.1rem;
-    height: 20px;
-    width: 20px;
-  }
-
-  &:hover,
-  &.active {
-    color: var(--cor-primaria);
-    background: rgba(0, 200, 240, 0.08);
-  }
-}
-
-.logout-btn {
-  margin-top: auto;
-
-  &:hover {
-    color: #ff5252;
-    background: rgba(255, 82, 82, 0.08);
-  }
-}
-
-// ---- Conteúdo Principal ----
 .main-content {
   margin-left: 240px;
   padding: 32px;
@@ -112,19 +38,39 @@
   cursor: pointer;
   transition: opacity 0.2s;
 
-  mat-icon {
-    font-size: 1.1rem;
-    height: 20px;
-    width: 20px;
+  mat-icon { font-size: 1.1rem; height: 20px; width: 20px; }
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:not(:disabled):hover { opacity: 0.9; }
+}
+
+// ---- Filtros ----
+.filtros {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.filtro-btn {
+  padding: 6px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 200, 240, 0.25);
+  background: transparent;
+  color: #4a7a9b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: var(--cor-primaria);
+    color: var(--cor-primaria);
   }
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  &:not(:disabled):hover {
-    opacity: 0.9;
+  &.active {
+    background: var(--cor-primaria);
+    border-color: var(--cor-primaria);
+    color: #050e1a;
+    font-weight: 600;
   }
 }
 
@@ -140,9 +86,7 @@
   margin: 0 0 20px;
 }
 
-.full-width {
-  width: 100%;
-}
+.full-width { width: 100%; }
 
 .form-actions {
   display: flex;
@@ -182,6 +126,26 @@
   opacity: 0.4;
 }
 
+// ---- Badge de status ----
+.badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.3px;
+
+  &.ativo {
+    background: rgba(0, 230, 118, 0.12);
+    color: #00e676;
+  }
+
+  &.inativo {
+    background: rgba(255, 82, 82, 0.1);
+    color: #ff5252;
+  }
+}
+
 .confirm-delete {
   display: inline-flex;
   align-items: center;
@@ -197,10 +161,7 @@
 // ---- Angular Material overrides ----
 ::ng-deep {
   .centros-table {
-    .mat-mdc-header-row {
-      background: rgba(0, 200, 240, 0.05);
-    }
-
+    .mat-mdc-header-row { background: rgba(0, 200, 240, 0.05); }
     .mat-mdc-header-cell {
       color: var(--cor-primaria);
       font-weight: 600;
@@ -208,14 +169,18 @@
       letter-spacing: 0.5px;
       border-bottom-color: rgba(0, 200, 240, 0.1);
     }
-
     .mat-mdc-cell {
       color: #e0e0e0;
       border-bottom-color: rgba(0, 200, 240, 0.05);
     }
-
-    .mat-mdc-row:hover {
-      background: rgba(0, 200, 240, 0.04);
-    }
+    .mat-mdc-row:hover { background: rgba(0, 200, 240, 0.04); }
   }
+
+  // ---- Cores dos botões de ação ----
+.btn-edit mat-icon     { color: #ffd740; }
+.btn-inativar mat-icon { color: #ff5252; }
+.btn-confirm mat-icon  { color: #00e676; }
+.btn-cancel mat-icon   { color: #ff5252; }
+.btn-reativar mat-icon { color: #00e676; }
+
 }

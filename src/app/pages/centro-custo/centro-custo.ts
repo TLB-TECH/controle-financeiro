@@ -1,6 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,14 +9,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CentroCustoService, CentroCustoDTO } from '../../services/centro-custo.service';
-import { AuthService } from '../../services/auth.service';
+import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-centro-custo',
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     ReactiveFormsModule,
     MatTableModule,
     MatIconModule,
@@ -25,15 +23,14 @@ import { AuthService } from '../../services/auth.service';
     MatFormFieldModule,
     MatInputModule,
     MatSnackBarModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    SidebarComponent
   ],
   templateUrl: './centro-custo.html',
-  styleUrl: './centro-custo.scss',
+  styleUrl: './centro-custo.scss'
 })
 export class CentroCusto implements OnInit {
   private centroCustoService = inject(CentroCustoService);
-  private authService = inject(AuthService);
-  private router = inject(Router);
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
 
@@ -42,9 +39,12 @@ export class CentroCusto implements OnInit {
   salvando = false;
   mostrarFormulario = false;
   editandoId: number | null = null;
-  confirmarExclusaoId: number | null = null;
+  confirmarInativacaoId: number | null = null;
 
-  colunas = ['nome', 'acoes'];
+  // Filtro: true = ativos, false = inativos, null = todos
+  filtroAtivo: boolean | null = true;
+
+  colunas = ['nome', 'status', 'acoes'];
 
   form: FormGroup = this.fb.group({
     nome: ['', [Validators.required, Validators.minLength(2)]]
@@ -56,30 +56,37 @@ export class CentroCusto implements OnInit {
 
   carregar(): void {
     this.carregando = true;
-    this.centroCustoService.listar().subscribe({
+    this.centroCustoService.listar(this.filtroAtivo).subscribe({
       next: (data) => {
-        this.centros = data.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+        this.centros = data;
         this.carregando = false;
       },
       error: () => {
-        this.snackBar.open('Erro ao carregar centros de custo.', 'Fechar', {duration: 3000});
+        this.snackBar.open('Erro ao carregar centros de custo.', 'Fechar', { duration: 3000 });
         this.carregando = false;
       }
     });
+  }
+
+  setFiltro(valor: boolean | null): void {
+    this.filtroAtivo = valor;
+    this.fecharFormulario();
+    this.confirmarInativacaoId = null;
+    this.carregar();
   }
 
   abrirNovo(): void {
     this.editandoId = null;
     this.form.reset();
     this.mostrarFormulario = true;
-    this.confirmarExclusaoId = null;
+    this.confirmarInativacaoId = null;
   }
 
   editar(centro: CentroCustoDTO): void {
     this.editandoId = centro.id ?? null;
-    this.form.patchValue({nome: centro.nome});
+    this.form.patchValue({ nome: centro.nome });
     this.mostrarFormulario = true;
-    this.confirmarExclusaoId = null;
+    this.confirmarInativacaoId = null;
   }
 
   fecharFormulario(): void {
@@ -100,44 +107,52 @@ export class CentroCusto implements OnInit {
     operacao.subscribe({
       next: () => {
         this.snackBar.open(
-          this.editandoId ? 'Atualizado com sucesso!' : 'Criado com sucesso!', 'Fechar', { duration: 3000 }
+          this.editandoId ? 'Atualizado com sucesso!' : 'Criado com sucesso!',
+          'Fechar', { duration: 3000 }
         );
         this.fecharFormulario();
         this.carregar();
         this.salvando = false;
       },
       error: () => {
-        this.snackBar.open('Erro ao salvar. Tente novamete.', 'Fechar', { duration: 3000});
+        this.snackBar.open('Erro ao salvar. Tente novamente.', 'Fechar', { duration: 3000 });
         this.salvando = false;
-      }
-    });  
-  }
-
-  pedirConfirmacao(id: number): void {
-    this.confirmarExclusaoId = id;
-    this.mostrarFormulario = false;
-  }
-
-  cancelarExclusao(): void {
-    this.confirmarExclusaoId = null;
-  }
-
-  excluir(id: number): void {
-    this.centroCustoService.excluir(id).subscribe({
-      next: () => {
-        this.snackBar.open('Excluido com sucesso!', 'Fechar', { duration: 3000});
-        this.confirmarExclusaoId = null;
-        this.carregar();
-      },
-      error: () => {
-        this.snackBar.open('Erro ao excluir.', 'Fechar', { duration: 3000});
-        this.confirmarExclusaoId = null;
       }
     });
   }
 
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  pedirConfirmacaoInativacao(id: number): void {
+    this.confirmarInativacaoId = id;
+    this.mostrarFormulario = false;
+  }
+
+  cancelarInativacao(): void {
+    this.confirmarInativacaoId = null;
+  }
+
+  inativar(id: number): void {
+    this.centroCustoService.inativar(id).subscribe({
+      next: () => {
+        this.snackBar.open('Inativado com sucesso!', 'Fechar', { duration: 3000 });
+        this.confirmarInativacaoId = null;
+        this.carregar();
+      },
+      error: () => {
+        this.snackBar.open('Erro ao inativar.', 'Fechar', { duration: 3000 });
+        this.confirmarInativacaoId = null;
+      }
+    });
+  }
+
+  reativar(id: number): void {
+    this.centroCustoService.reativar(id).subscribe({
+      next: () => {
+        this.snackBar.open('Reativado com sucesso!', 'Fechar', { duration: 3000 });
+        this.carregar();
+      },
+      error: () => {
+        this.snackBar.open('Erro ao reativar.', 'Fechar', { duration: 3000 });
+      }
+    });
   }
 }
