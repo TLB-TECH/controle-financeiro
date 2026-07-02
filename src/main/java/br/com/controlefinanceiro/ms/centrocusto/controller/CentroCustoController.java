@@ -24,8 +24,9 @@ public class CentroCustoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CentroCustoResponseDTO>> listar() {
-        return ResponseEntity.ok(centroCustoService.listar());
+    public ResponseEntity<List<CentroCustoResponseDTO>> listar(
+            @RequestParam(required = false) Boolean ativo) {
+        return ResponseEntity.ok(centroCustoService.listar(ativo));
     }
 
     @GetMapping("/{id}")
@@ -40,9 +41,13 @@ public class CentroCustoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        centroCustoService.deletar(id);
+    public ResponseEntity<Void> inativar(@PathVariable Long id) {
+        centroCustoService.inativar(id);
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{id}/reativar")
+    public ResponseEntity<CentroCustoResponseDTO> reativar(@PathVariable Long id) {
+        return ResponseEntity.ok(centroCustoService.reativar(id));
+    }
 }

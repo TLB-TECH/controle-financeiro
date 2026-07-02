@@ -32,10 +32,21 @@ public class CentroCustoService {
         return CentroCustoResponseDTO.fromEntity(centroCustoRepository.save(centroCusto));
     }
 
-    public List<CentroCustoResponseDTO> listar() {
+    public List<CentroCustoResponseDTO> listar(Boolean ativo) {
         String email = getEmailAutenticado();
-        return centroCustoRepository.findByUsuarioIdAndAtivoTrue(email)
-                .stream()
+
+        List<CentroCusto> resultado;
+
+        if (ativo == null) {
+            resultado = centroCustoRepository.findByUsuarioId(email);
+        } else if (ativo) {
+            resultado = centroCustoRepository.findByUsuarioIdAndAtivoTrue(email);
+        } else {
+            resultado = centroCustoRepository.findByUsuarioIdAndAtivoFalse(email);
+        }
+
+        return resultado.stream()
+                .sorted((a, b) -> a.getNome().compareToIgnoreCase(b.getNome()))
                 .map(CentroCustoResponseDTO::fromEntity)
                 .toList();
     }
@@ -60,14 +71,28 @@ public class CentroCustoService {
         return CentroCustoResponseDTO.fromEntity(centroCustoRepository.save(centroCusto));
     }
 
-    public void deletar(Long id) {
+    public void inativar(Long id) {
         String email = getEmailAutenticado();
         CentroCusto centroCusto = centroCustoRepository
                 .findByIdAndUsuarioIdAndAtivoTrue(id, email)
-                .orElseThrow(() -> new RuntimeException("Centro de custo não encontrado."));
+                .orElseThrow(() -> new RuntimeException("Centro de custo não encontrado ou já inativo."));
 
         centroCusto.setAtivo(false);
         centroCustoRepository.save(centroCusto);
+    }
+
+    public CentroCustoResponseDTO reativar(Long id) {
+        String email = getEmailAutenticado();
+        CentroCusto centroCusto = centroCustoRepository
+                .findByIdAndUsuarioId(id, email)
+                .orElseThrow(() -> new RuntimeException("Centro de custo não encontrado."));
+
+        if (centroCusto.getAtivo()) {
+            throw new IllegalStateException("Centro de custo já está ativo.");
+        }
+
+        centroCusto.setAtivo(true);
+        return CentroCustoResponseDTO.fromEntity(centroCustoRepository.save(centroCusto));
     }
 
     private String getEmailAutenticado() {
