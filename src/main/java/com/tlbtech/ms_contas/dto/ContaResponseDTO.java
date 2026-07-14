@@ -1,7 +1,6 @@
 package com.tlbtech.ms_contas.dto;
 
 import com.tlbtech.ms_contas.model.Conta;
-import com.tlbtech.ms_contas.model.TipoConta;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,7 +9,7 @@ public record ContaResponseDTO(
         Long id,
         String nome,
         String banco,
-        TipoConta tipo,
+        TipoContaResponseDTO tipoConta,
         BigDecimal saldo,
         Boolean ativo,
         LocalDateTime criadoEm
@@ -20,7 +19,7 @@ public record ContaResponseDTO(
                 conta.getId(),
                 conta.getNome(),
                 conta.getBanco(),
-                conta.getTipo(),
+                conta.getTipoConta() != null ? TipoContaResponseDTO.fromEntity(conta.getTipoConta()) : null,
                 conta.getSaldo(),
                 conta.getAtivo(),
                 conta.getCriadoEm()

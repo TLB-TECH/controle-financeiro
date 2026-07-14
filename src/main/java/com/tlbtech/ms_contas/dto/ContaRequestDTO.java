@@ -1,6 +1,5 @@
 package com.tlbtech.ms_contas.dto;
 
-import com.tlbtech.ms_contas.model.TipoConta;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -15,7 +14,7 @@ public record ContaRequestDTO(
         String banco,
 
         @NotNull(message = "Tipo é obrigatório")
-        TipoConta tipo,
+        Long tipoContaId,
 
         @NotNull(message = "Saldo é obrigatório")
         BigDecimal saldo
