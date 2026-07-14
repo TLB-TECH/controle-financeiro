@@ -1,11 +1,14 @@
 package com.tlbtech.ms_contas.service;
 
 import com.tlbtech.ms_contas.dto.*;
+import com.tlbtech.ms_contas.model.CategoriaTipoConta;
 import com.tlbtech.ms_contas.model.Conta;
 import com.tlbtech.ms_contas.model.TipoConta;
 import com.tlbtech.ms_contas.repository.ContaRepository;
+import com.tlbtech.ms_contas.repository.TipoContaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,15 +21,7 @@ import java.util.List;
 public class ContaService {
 
     private final ContaRepository repository;
-
-    private static final List<TipoConta> TIPOS_BANCO = List.of(
-            TipoConta.CORRENTE, TipoConta.POUPANCA
-    );
-
-    private static final List<TipoConta> TIPOS_APLICACAO = List.of(
-            TipoConta.CDB, TipoConta.LCI, TipoConta.LCA,
-            TipoConta.TESOURO, TipoConta.FUNDO
-    );
+    private final TipoContaRepository tipoContaRepository;
 
     public List<ContaResponseDTO> listar() {
         return repository.findByAtivoTrue()
@@ -44,7 +39,7 @@ public class ContaService {
         Conta conta = Conta.builder()
                 .nome(dto.nome())
                 .banco(dto.banco())
-                .tipo(dto.tipo())
+                .tipoConta(buscarTipoConta(dto.tipoContaId()))
                 .saldo(dto.saldo())
                 .build();
         return ContaResponseDTO.fromEntity(repository.save(conta));
@@ -55,7 +50,7 @@ public class ContaService {
         Conta conta = buscarEntidade(id);
         conta.setNome(dto.nome());
         conta.setBanco(dto.banco());
-        conta.setTipo(dto.tipo());
+        conta.setTipoConta(buscarTipoConta(dto.tipoContaId()));
         conta.setSaldo(dto.saldo());
         return ContaResponseDTO.fromEntity(repository.save(conta));
     }
@@ -90,16 +85,23 @@ public class ContaService {
     }
 
     public BigDecimal totalBancos() {
-        return repository.sumSaldoByTipos(TIPOS_BANCO);
+        return repository.sumSaldoByCategoria(CategoriaTipoConta.BANCO);
     }
 
     public BigDecimal totalAplicacoes() {
-        return repository.sumSaldoByTipos(TIPOS_APLICACAO);
+        return repository.sumSaldoByCategoria(CategoriaTipoConta.APLICACAO);
     }
 
     private Conta buscarEntidade(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Conta não encontrada"));
+    }
+
+    private TipoConta buscarTipoConta(Long tipoContaId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return tipoContaRepository.findByIdAndUsuarioId(tipoContaId, email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Tipo de conta não encontrado"));
     }
 }

@@ -25,9 +25,9 @@ public class Conta {
     @Column(nullable = false, length = 100)
     private String banco;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    private TipoConta tipo;
+    @ManyToOne
+    @JoinColumn(name = "tipo_conta_id")
+    private TipoConta tipoConta;
 
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal saldo;
