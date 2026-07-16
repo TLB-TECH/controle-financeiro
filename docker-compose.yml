@@ -74,6 +74,18 @@ services:
     networks:
       - financeiro-network
 
+  postgres-orcamento:
+    image: postgres:15-alpine
+    container_name: postgres-orcamento
+    environment:
+      POSTGRES_DB: CF_orcamento
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5439:5432"
+    networks:
+      - financeiro-network
+
   # ==================== MICROSSERVIÇOS ====================
 
   ms-usuarios:
@@ -227,6 +239,22 @@ services:
     networks:
       - financeiro-network
 
+  ms-orcamento:
+    build: ../ms-orcamento
+    container_name: ms-orcamento
+    ports:
+      - "8088:8088"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-orcamento:5432/CF_orcamento
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+    depends_on:
+      - postgres-orcamento
+    networks:
+      - financeiro-network
+
   api-gateway:
     build: ../api-gateway
     container_name: api-gateway
@@ -240,6 +268,7 @@ services:
       MS_CENTRO_CUSTO_URL: http://ms-centro-custo:8082
       MS_FLUXO_CAIXA_URL: http://ms-fluxo-caixa:8084
       MS_CONTAS_URL: http://ms-contas:8087
+      MS_ORCAMENTO_URL: http://ms-orcamento:8088
     depends_on:
       - ms-usuarios
       - ms-lancamentos
@@ -247,6 +276,7 @@ services:
       - ms-fluxo-caixa
       - bff-financeiro
       - ms-contas
+      - ms-orcamento
     networks:
       - financeiro-network
 
