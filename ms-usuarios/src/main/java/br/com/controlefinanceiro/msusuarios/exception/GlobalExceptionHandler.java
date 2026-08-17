@@ -33,6 +33,13 @@ public class GlobalExceptionHandler {
                 .body(Map.of("erro", ex.getMessage()));
     }
 
+    @ExceptionHandler(PagamentoException.class)
+    public ResponseEntity<Map<String, String>> handlePagamento(
+            PagamentoException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(Map.of("erro", ex.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidacao(
             MethodArgumentNotValidException ex) {

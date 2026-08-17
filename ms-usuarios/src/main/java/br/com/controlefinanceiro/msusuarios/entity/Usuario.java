@@ -37,6 +37,26 @@ public class Usuario {
     @Builder.Default
     private Boolean ativo = true;
 
+    @Column(name = "reset_token", length = 255)
+    private String resetToken;
+
+    @Column(name = "reset_token_expiracao")
+    private LocalDateTime resetTokenExpiracao;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_assinatura", nullable = false, length = 20)
+    @Builder.Default
+    private StatusAssinatura statusAssinatura = StatusAssinatura.TRIAL;
+
+    @Column(name = "trial_fim", nullable = false)
+    private LocalDateTime trialFim;
+
+    @Column(name = "mp_preapproval_id", length = 100)
+    private String mpPreapprovalId;
+
+    @Column(name = "assinatura_atualizada_em")
+    private LocalDateTime assinaturaAtualizadaEm;
+
     @CreationTimestamp
     @Column(name = "data_criacao", nullable = false, updatable = false)
     private LocalDateTime dataCriacao;
