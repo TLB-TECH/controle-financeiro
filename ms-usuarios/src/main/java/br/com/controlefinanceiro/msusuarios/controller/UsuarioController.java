@@ -1,5 +1,6 @@
 package br.com.controlefinanceiro.msusuarios.controller;
 
+import br.com.controlefinanceiro.msusuarios.dto.AlterarSenhaRequestDTO;
 import br.com.controlefinanceiro.msusuarios.dto.UsuarioRequestDTO;
 import br.com.controlefinanceiro.msusuarios.dto.UsuarioResponseDTO;
 import br.com.controlefinanceiro.msusuarios.service.UsuarioService;
@@ -7,10 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -26,27 +25,24 @@ public class UsuarioController {
                 .body(usuarioService.criar(dto));
     }
 
-    @GetMapping
-    public ResponseEntity<List<UsuarioResponseDTO>> listarTodos() {
-        return ResponseEntity.ok(usuarioService.listarTodos());
+    @GetMapping("/me")
+    public ResponseEntity<UsuarioResponseDTO> meuPerfil() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok(usuarioService.buscarPorEmail(email));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UsuarioResponseDTO> buscarPorId(
-            @PathVariable UUID id) {
-        return ResponseEntity.ok(usuarioService.buscarPorId(id));
+    @PutMapping("/me/senha")
+    public ResponseEntity<Void> alterarSenha(
+            @RequestBody @Valid AlterarSenhaRequestDTO dto) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        usuarioService.alterarSenha(email, dto);
+        return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UsuarioResponseDTO> atualizar(
-            @PathVariable UUID id,
-            @RequestBody @Valid UsuarioRequestDTO dto) {
-        return ResponseEntity.ok(usuarioService.atualizar(id,dto));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> desativar(@PathVariable UUID id) {
-        usuarioService.desativar(id);
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> excluirContaPropria() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        usuarioService.excluirContaPropria(email);
         return ResponseEntity.noContent().build();
     }
 }
