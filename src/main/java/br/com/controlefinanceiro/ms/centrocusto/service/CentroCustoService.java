@@ -7,6 +7,7 @@ import br.com.controlefinanceiro.ms.centrocusto.repository.CentroCustoRepository
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -81,6 +82,15 @@ public class CentroCustoService {
         centroCustoRepository.save(centroCusto);
     }
 
+    public void excluir(Long id) {
+        String email = getEmailAutenticado();
+        CentroCusto centroCusto = centroCustoRepository
+                .findByIdAndUsuarioIdAndAtivoFalse(id, email)
+                .orElseThrow(() -> new IllegalStateException("Centro de custo não encontrado ou ainda ativo. Inative antes de excluir."));
+
+        centroCustoRepository.delete(centroCusto);
+    }
+
     public CentroCustoResponseDTO reativar(Long id) {
         String email = getEmailAutenticado();
         CentroCusto centroCusto = centroCustoRepository
@@ -97,5 +107,11 @@ public class CentroCustoService {
 
     private String getEmailAutenticado() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    /** Apaga de vez todos os centros de custo do usuário (exclusão de conta em cascata). */
+    @Transactional
+    public void excluirDadosUsuario(String usuarioId) {
+        centroCustoRepository.deleteByUsuarioId(usuarioId);
     }
 }

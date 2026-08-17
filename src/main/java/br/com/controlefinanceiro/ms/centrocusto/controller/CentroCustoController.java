@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/centros-custo")
@@ -49,5 +50,16 @@ public class CentroCustoController {
     @PatchMapping("/{id}/reativar")
     public ResponseEntity<CentroCustoResponseDTO> reativar(@PathVariable Long id) {
         return ResponseEntity.ok(centroCustoService.reativar(id));
+    }
+
+    @DeleteMapping("/{id}/excluir")
+    public ResponseEntity<Void> excluir(@PathVariable Long id) {
+        centroCustoService.excluir(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> tratarIllegalState(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", ex.getMessage()));
     }
 }

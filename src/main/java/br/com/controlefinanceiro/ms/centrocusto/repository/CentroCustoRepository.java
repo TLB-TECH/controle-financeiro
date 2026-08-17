@@ -16,7 +16,11 @@ public interface CentroCustoRepository extends JpaRepository<CentroCusto, Long> 
 
     Optional<CentroCusto> findByIdAndUsuarioIdAndAtivoTrue(Long id, String usuarioId);
 
+    Optional<CentroCusto> findByIdAndUsuarioIdAndAtivoFalse(Long id, String usuarioId);
+
     Optional<CentroCusto> findByIdAndUsuarioId(Long id, String usuarioId);
 
     boolean existsByNomeAndUsuarioIdAndAtivoTrue(String nome, String usuarioId);
+
+    void deleteByUsuarioId(String usuarioId);
 }
