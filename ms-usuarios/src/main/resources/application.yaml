@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: ms-usuarios
+  cloud:
+    compatibility-verifier:
+      enabled: false
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/CF_usuarios}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
@@ -20,10 +23,41 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: America/Sao_Paulo
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:86400000}
+
+app:
+  url: ${APP_URL:http://localhost:4200}
+
+internal:
+  secret: ${INTERNAL_SECRET}
+
+mercadopago:
+  access-token: ${MP_ACCESS_TOKEN}
+  webhook-secret: ${MP_WEBHOOK_SECRET}
+  preco-mensal: ${MP_PRECO_MENSAL:19.90}
+
+ms-lancamentos:
+  url: ${MS_LANCAMENTOS_URL:http://localhost:8083}
+ms-centro-custo:
+  url: ${MS_CENTRO_CUSTO_URL:http://localhost:8082}
+ms-contas:
+  url: ${MS_CONTAS_URL:http://localhost:8087}
+ms-orcamento:
+  url: ${MS_ORCAMENTO_URL:http://localhost:8088}
 
 springdoc:
   api-docs:
