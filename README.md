@@ -91,8 +91,8 @@ O projeto foi desenvolvido seguindo boas práticas de mercado: microsserviços i
 ## 📦 Estrutura do Projeto
 
 ```
-controle-financeiro/                 # monorepo (contém também ms-usuarios e ms-lancamentos)
-├── .github/workflows/                # pipelines de CI de ms-usuarios e ms-lancamentos
+controle-financeiro/                 # monorepo — todos os serviços e o frontend vivem aqui
+├── .github/workflows/                # um pipeline de CI por serviço (dispara só quando a pasta muda)
 ├── controle-financeiro-infra/        # Docker Compose + infra
 ├── api-gateway/                      # Spring Cloud Gateway — porta 8080
 ├── ms-usuarios/                      # Usuários + Autenticação + Assinatura — porta 8081
@@ -194,9 +194,9 @@ Standalone components com lazy loading por rota, Angular Material e Chart.js par
 ### Subindo o projeto completo
 
 ```bash
-# Clone a infraestrutura
-git clone https://github.com/TLB-TECH/controle-financeiro-infra.git
-cd controle-financeiro-infra
+# Clone o monorepo
+git clone https://github.com/TLB-TECH/controle-financeiro.git
+cd controle-financeiro/controle-financeiro-infra
 
 # Configure as variáveis de ambiente
 cp .env.example .env
@@ -263,7 +263,7 @@ MP_WEBHOOK_SECRET=seu_webhook_secret
 
 ## ⚙️ CI/CD
 
-Cada microsserviço tem seu próprio pipeline de GitHub Actions (build + `mvn verify` com PostgreSQL de serviço, quando aplicável), disparado em `push` e `pull_request`:
+Cada microsserviço tem seu próprio pipeline em `.github/workflows/`, com `paths:` restringindo o gatilho à pasta do respectivo serviço — um push que só mexe em `ms-lancamentos/` não dispara CI de `ms-contas`, por exemplo:
 
 | Serviço | O que roda |
 |---|---|
@@ -272,7 +272,7 @@ Cada microsserviço tem seu próprio pipeline de GitHub Actions (build + `mvn ve
 | api-gateway / bff-financeiro / ms-fluxo-caixa | Build + testes (`mvn verify`) |
 | ms-contas / ms-orcamento | Build + push de imagem Docker para o GHCR (`-DskipTests`) |
 
-Os testes que sobem o contexto Spring completo (`@SpringBootTest`) exigem que os secrets usados nos `@Value` (`JWT_SECRET`, `INTERNAL_SECRET`, e no caso do ms-usuarios também `MP_ACCESS_TOKEN`/`MP_WEBHOOK_SECRET`) estejam cadastrados nas configurações do repositório em **Settings → Secrets and variables → Actions**.
+Os testes que sobem o contexto Spring completo (`@SpringBootTest`) exigem que os secrets usados nos `@Value` (`JWT_SECRET`, `INTERNAL_SECRET`, e no caso do ms-usuarios também `MP_ACCESS_TOKEN`/`MP_WEBHOOK_SECRET`) estejam cadastrados uma única vez nas configurações deste repositório, em **Settings → Secrets and variables → Actions**.
 
 ---
 
@@ -312,20 +312,12 @@ Meta de cobertura: **80%+**
 
 ---
 
-## 📂 Repositórios
+## 📂 Repositório
 
-| Repositório | Descrição |
-|---|---|
-| [controle-financeiro](https://github.com/TLB-TECH/controle-financeiro) | Monorepo principal (inclui `ms-usuarios` e `ms-lancamentos`) |
-| [ms-api-gateway](https://github.com/TLB-TECH/ms-api-gateway) | API Gateway |
-| [bff-financeiro](https://github.com/TLB-TECH/bff-financeiro) | BFF |
-| [ms-centro-custo](https://github.com/TLB-TECH/ms-centro-custo) | Centro de Custo |
-| [ms-fluxo-caixa](https://github.com/TLB-TECH/ms-fluxo-caixa) | Fluxo de Caixa |
-| [ms-notificacao](https://github.com/TLB-TECH/ms-notificacao) | Notificações |
-| [ms-contas](https://github.com/Taciolb/ms-contas) | Contas e Tipos de Conta |
-| [ms-orcamento](https://github.com/TLB-TECH/ms-orcamento) | Orçamentos e Metas de Aplicação |
-| [controle-financeiro-infra](https://github.com/TLB-TECH/controle-financeiro-infra) | Infraestrutura Docker |
-| [controle-financeiro-usuario-front](https://github.com/TLB-TECH/controle-financeiro-usuario-front) | Frontend Angular |
+Todo o sistema — os oito microsserviços, o API Gateway, o BFF, a infraestrutura Docker e o frontend
+Angular — vive neste único repositório: [TLB-TECH/controle-financeiro](https://github.com/TLB-TECH/controle-financeiro).
+Cada serviço mantém seu histórico de commits original (importado via `git subtree`), mas o
+desenvolvimento, as issues e o CI/CD passam a ser centralizados aqui.
 
 ---
 
