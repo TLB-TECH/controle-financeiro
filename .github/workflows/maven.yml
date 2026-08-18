@@ -39,4 +39,5 @@ jobs:
         env:
           DB_PASSWORD: postgres
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          INTERNAL_SECRET: ${{ secrets.INTERNAL_SECRET }}
         run: mvn clean verify
