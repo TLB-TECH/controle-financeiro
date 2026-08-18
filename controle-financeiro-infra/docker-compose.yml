@@ -1,0 +1,335 @@
+services:
+
+  # ==================== BANCOS ====================
+
+  postgres-usuarios:
+    image: postgres:15-alpine
+    container_name: postgres-usuarios
+    environment:
+      POSTGRES_DB: CF_usuarios
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    networks:
+      - financeiro-network
+
+  postgres-centrocusto:
+    image: postgres:15-alpine
+    container_name: postgres-centrocusto
+    environment:
+      POSTGRES_DB: CF_centrocusto
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5434:5432"
+    networks:
+      - financeiro-network
+
+  postgres-lancamentos:
+    image: postgres:15-alpine
+    container_name: postgres-lancamentos
+    environment:
+      POSTGRES_DB: CF_lancamentos
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5435:5432"
+    networks:
+      - financeiro-network
+
+  postgres-notificacao:
+    image: postgres:15-alpine
+    container_name: postgres-notificacao
+    environment:
+      POSTGRES_DB: CF_notificacao
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5436:5432"
+    networks:
+      - financeiro-network
+
+  postgres-evolution:
+    image: postgres:15-alpine
+    container_name: postgres-evolution
+    environment:
+      POSTGRES_DB: evolution
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5437:5432"
+    networks:
+      - financeiro-network
+
+  postgres-contas:
+    image: postgres:15-alpine
+    container_name: postgres-contas
+    environment:
+      POSTGRES_DB: CF_contas
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5438:5432"
+    networks:
+      - financeiro-network
+
+  postgres-orcamento:
+    image: postgres:15-alpine
+    container_name: postgres-orcamento
+    environment:
+      POSTGRES_DB: CF_orcamento
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5439:5432"
+    networks:
+      - financeiro-network
+
+  # ==================== MICROSSERVIÇOS ====================
+
+  ms-usuarios:
+    build: ../ms-usuarios
+    container_name: ms-usuarios
+    expose:
+      - "8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-usuarios:5432/CF_usuarios
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      APP_URL: ${APP_URL:-http://localhost:4200}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
+      MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET}
+      MS_LANCAMENTOS_URL: http://ms-lancamentos:8083
+      MS_CENTRO_CUSTO_URL: http://ms-centro-custo:8082
+      MS_CONTAS_URL: http://ms-contas:8087
+      MS_ORCAMENTO_URL: http://ms-orcamento:8088
+    depends_on:
+      - postgres-usuarios
+      - ms-lancamentos
+      - ms-centro-custo
+      - ms-contas
+      - ms-orcamento
+    networks:
+      - financeiro-network
+
+  ms-centro-custo:
+    build: ../ms-centro-custo
+    container_name: ms-centro-custo
+    expose:
+      - "8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-centrocusto:5432/CF_centrocusto
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+    depends_on:
+      - postgres-centrocusto
+    networks:
+      - financeiro-network
+
+  ms-lancamentos:
+    build: ../ms-lancamentos
+    container_name: ms-lancamentos
+    expose:
+      - "8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-lancamentos:5432/CF_lancamentos
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      MS_CENTRO_CUSTO_URL: http://ms-centro-custo:8082
+      MS_CONTAS_URL: http://ms-contas:8087
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+    depends_on:
+      - postgres-lancamentos
+      - ms-centro-custo
+      - ms-contas
+    networks:
+      - financeiro-network
+
+  ms-fluxo-caixa:
+    build: ../ms-fluxo-caixa
+    container_name: ms-fluxo-caixa
+    expose:
+      - "8084"
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      MS_LANCAMENTOS_URL: http://ms-lancamentos:8083
+    depends_on:
+      - ms-lancamentos
+    networks:
+      - financeiro-network
+
+  bff-financeiro:
+    build: ../bff-financeiro
+    container_name: bff-financeiro
+    ports:
+      - "8085:8085"
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      MS_LANCAMENTOS_URL: http://ms-lancamentos:8083
+      MS_CENTRO_CUSTO_URL: http://ms-centro-custo:8082
+      MS_FLUXO_CAIXA_URL: http://ms-fluxo-caixa:8084
+    depends_on:
+      - ms-lancamentos
+      - ms-centro-custo
+      - ms-fluxo-caixa
+    networks:
+      - financeiro-network
+
+  ms-notificacao:
+    build: ../ms-notificacao
+    container_name: ms-notificacao
+    expose:
+      - "8086"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notificacao:5432/CF_notificacao
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      MS_LANCAMENTOS_URL: http://ms-lancamentos:8083
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL}
+      EVOLUTION_API_URL: ${EVOLUTION_API_URL}
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+      EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE}
+      WHATSAPP_ENABLED: "false"
+    depends_on:
+      - postgres-notificacao
+      - ms-lancamentos
+      - evolution-api
+    networks:
+      - financeiro-network
+
+  evolution-api:
+    image: atendai/evolution-api:v2.1.1
+    container_name: evolution-api
+    ports:
+      - "8089:8080"
+    environment:
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY}
+      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "true"
+      DEL_INSTANCE: "false"
+      DATABASE_ENABLED: "true"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-evolution:5432/evolution
+      CACHE_REDIS_ENABLED: "false"
+      CACHE_LOCAL_ENABLED: "true"
+      QRCODE_LIMIT: 30
+    volumes:
+      - evolution_instances:/evolution/instances
+      - evolution_store:/evolution/store
+    depends_on:
+      - postgres-evolution
+    networks:
+      - financeiro-network
+
+  ms-contas:
+    build: ../ms-contas
+    container_name: ms-contas
+    expose:
+      - "8087"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-contas:5432/CF_contas
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+    depends_on:
+      - postgres-contas
+    networks:
+      - financeiro-network
+
+  ms-orcamento:
+    build: ../ms-orcamento
+    container_name: ms-orcamento
+    expose:
+      - "8088"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-orcamento:5432/CF_orcamento
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+    depends_on:
+      - postgres-orcamento
+    networks:
+      - financeiro-network
+
+  api-gateway:
+    build: ../api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      MS_USUARIOS_URL: http://ms-usuarios:8081
+      MS_LANCAMENTOS_URL: http://ms-lancamentos:8083
+      MS_CENTRO_CUSTO_URL: http://ms-centro-custo:8082
+      MS_FLUXO_CAIXA_URL: http://ms-fluxo-caixa:8084
+      MS_CONTAS_URL: http://ms-contas:8087
+      MS_ORCAMENTO_URL: http://ms-orcamento:8088
+    depends_on:
+      - ms-usuarios
+      - ms-lancamentos
+      - ms-centro-custo
+      - ms-fluxo-caixa
+      - bff-financeiro
+      - ms-contas
+      - ms-orcamento
+    networks:
+      - financeiro-network
+
+  # Backup diário (3h) de todos os bancos Postgres, com backup imediato ao subir o container
+  # e retenção de 14 dias. Ver backup/backup.sh e backup/restore.sh.
+  backup:
+    image: postgres:15-alpine
+    container_name: backup-financeiro
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./backups:/backups
+      - ./backup/backup.sh:/backup.sh:ro
+      - ./backup/restore.sh:/restore.sh:ro
+    entrypoint: >
+      sh -c "
+      echo '0 3 * * * sh /backup.sh >> /backups/backup.log 2>&1' > /etc/crontabs/root &&
+      sh /backup.sh &&
+      crond -f -l 2
+      "
+    depends_on:
+      - postgres-usuarios
+      - postgres-contas
+      - postgres-centrocusto
+      - postgres-lancamentos
+      - postgres-orcamento
+      - postgres-notificacao
+      - postgres-evolution
+    networks:
+      - financeiro-network
+
+networks:
+  financeiro-network:
+    driver: bridge
+
+volumes:
+  evolution_instances:
+  evolution_store:
