@@ -31,7 +31,6 @@ public class AuthController {
             @RequestBody @Valid RecuperarSenhaRequestDTO dto) {
         usuarioService.recuperarSenha(dto.email());
         return ResponseEntity.ok().build();
-
     }
 
             @PostMapping("/redefinir-senha")
