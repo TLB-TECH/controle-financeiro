@@ -3,8 +3,10 @@ name: CI — ms-lancamentos
 on:
   push:
     branches: [ "main", "feature/**" ]
+    paths: ["ms-lancamentos/**"]
   pull_request:
     branches: [ "main" ]
+    paths: ["ms-lancamentos/**"]
 
 jobs:
   build-and-test:

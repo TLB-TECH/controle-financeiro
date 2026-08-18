@@ -3,8 +3,10 @@ name: CI - ms-centro-custo
 on:
   push:
     branches: [ "main", "feature/**" ]
+    paths: ["ms-centro-custo/**"]
   pull_request:
     branches: [ "main" ]
+    paths: ["ms-centro-custo/**"]
 
 jobs:
   build:
@@ -36,6 +38,7 @@ jobs:
           cache: maven
 
       - name: Build and Test
+        working-directory: ms-centro-custo
         env:
           DB_PASSWORD: postgres
           JWT_SECRET: ${{ secrets.JWT_SECRET }}

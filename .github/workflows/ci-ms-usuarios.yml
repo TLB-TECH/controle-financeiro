@@ -3,8 +3,10 @@ name: CI — ms-usuarios
 on:
   push:
     branches: [ "main", "feature/**" ]
+    paths: ["ms-usuarios/**"]
   pull_request:
     branches: [ "main" ]
+    paths: ["ms-usuarios/**"]
 
 jobs:
   build-and-test:

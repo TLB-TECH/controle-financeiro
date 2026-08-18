@@ -3,8 +3,10 @@ name: CI/CD ms-contas
 on:
   push:
     branches: [ main ]
+    paths: ["ms-contas/**"]
   pull_request:
     branches: [ main ]
+    paths: ["ms-contas/**"]
 
 jobs:
   build-and-push:
@@ -22,6 +24,7 @@ jobs:
           cache: maven
 
       - name: Build com Maven
+        working-directory: ms-contas
         run: mvn clean package -DskipTests
 
       - name: Login no GitHub Container Registry
@@ -38,6 +41,6 @@ jobs:
       - name: Build e Push da imagem Docker
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./ms-contas
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: ghcr.io/${{ steps.owner.outputs.name }}/ms-contas:latest

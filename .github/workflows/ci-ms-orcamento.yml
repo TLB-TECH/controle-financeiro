@@ -3,8 +3,10 @@ name: CI/CD ms-orcamento
 on:
   push:
     branches: [ main ]
+    paths: ["ms-orcamento/**"]
   pull_request:
     branches: [ main ]
+    paths: ["ms-orcamento/**"]
 
 jobs:
   build-and-push:
@@ -25,6 +27,7 @@ jobs:
           cache: maven
 
       - name: Build com Maven
+        working-directory: ms-orcamento
         run: mvn clean package -DskipTests
 
       - name: Login no GitHub Container Registry
@@ -41,6 +44,6 @@ jobs:
       - name: Build e Push da imagem Docker
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./ms-orcamento
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: ghcr.io/${{ steps.owner.outputs.name }}/ms-orcamento:latest

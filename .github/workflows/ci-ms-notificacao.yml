@@ -3,8 +3,10 @@ name: CI - ms-notificacao
 on:
   push:
     branches: [ "**" ]
+    paths: ["ms-notificacao/**"]
   pull_request:
     branches: [ "**" ]
+    paths: ["ms-notificacao/**"]
 
 jobs:
   build:
@@ -36,6 +38,7 @@ jobs:
           cache: maven
 
       - name: Build and Test
+        working-directory: ms-notificacao
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/CF_notificacao
           SPRING_DATASOURCE_USERNAME: postgres

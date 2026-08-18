@@ -3,8 +3,10 @@ name: CI - ms-fluxo-caixa
 on:
   push:
     branches: [ "main", "feature/**" ]
+    paths: ["ms-fluxo-caixa/**"]
   pull_request:
     branches: [ "main" ]
+    paths: ["ms-fluxo-caixa/**"]
 
 jobs:
   build:
@@ -21,6 +23,7 @@ jobs:
           cache: maven
 
       - name: Build and Test
+        working-directory: ms-fluxo-caixa
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: mvn clean verify
