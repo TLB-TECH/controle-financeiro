@@ -1,7 +1,9 @@
 package br.com.controlefinanceiro.mslancamentos.service;
 
 import br.com.controlefinanceiro.mslancamentos.client.CentroCustoClient;
+import br.com.controlefinanceiro.mslancamentos.client.ContaClient;
 import br.com.controlefinanceiro.mslancamentos.dto.EfetivarRequestDTO;
+import br.com.controlefinanceiro.mslancamentos.dto.LancamentoBancarioRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoParceladoRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoRequestDTO;
 import br.com.controlefinanceiro.mslancamentos.dto.LancamentoResponseDTO;
@@ -11,6 +13,7 @@ import br.com.controlefinanceiro.mslancamentos.entity.Lancamento;
 import br.com.controlefinanceiro.mslancamentos.enums.FormaPagamento;
 import br.com.controlefinanceiro.mslancamentos.enums.StatusLancamento;
 import br.com.controlefinanceiro.mslancamentos.enums.TipoLancamento;
+import br.com.controlefinanceiro.mslancamentos.enums.TipoMovimentoBancario;
 import br.com.controlefinanceiro.mslancamentos.exception.LancamentoNaoAutorizadoException;
 import br.com.controlefinanceiro.mslancamentos.exception.LancamentoNaoEncontradoException;
 import br.com.controlefinanceiro.mslancamentos.repository.CartaoCreditoRepository;
@@ -36,6 +39,7 @@ public class LancamentoService {
     private final LancamentoRepository lancamentoRepository;
     private final CartaoCreditoRepository cartaoCreditoRepository;
     private final CentroCustoClient centroCustoClient;
+    private final ContaClient contaClient;
     private final HttpServletRequest request;
 
     private String getEmailAutenticado() {
@@ -55,6 +59,16 @@ public class LancamentoService {
         }
     }
 
+    private void validarCartaoCredito(FormaPagamento formaPagamento, Long cartaoCreditoId, String email) {
+        if (formaPagamento != FormaPagamento.CARTAO_CREDITO) return;
+        if (cartaoCreditoId == null) {
+            throw new LancamentoNaoAutorizadoException("Cartão de crédito é obrigatório para esta forma de pagamento");
+        }
+        cartaoCreditoRepository
+                .findByIdAndUsuarioIdAndAtivoTrue(cartaoCreditoId, email)
+                .orElseThrow(() -> new LancamentoNaoEncontradoException("Cartão de crédito não encontrado"));
+    }
+
     private BigDecimal calcularValor(BigDecimal valorOriginal, BigDecimal juros, BigDecimal desconto) {
         BigDecimal j = juros != null ? juros : BigDecimal.ZERO;
         BigDecimal d = desconto != null ? desconto : BigDecimal.ZERO;
@@ -64,6 +78,7 @@ public class LancamentoService {
     public LancamentoResponseDTO criar(LancamentoRequestDTO dto) {
         String email = getEmailAutenticado();
         validarCentroCusto(dto.centroCustoId());
+        validarCartaoCredito(dto.formaPagamento(), dto.cartaoCreditoId(), email);
 
         Lancamento lancamento = Lancamento.builder()
                 .descricao(dto.descricao())
@@ -75,6 +90,7 @@ public class LancamentoService {
                 .valor(calcularValor(dto.valorOriginal(), dto.juros(), dto.desconto()))
                 .tipo(dto.tipo())
                 .formaPagamento(dto.formaPagamento())
+                .cartaoCreditoId(dto.cartaoCreditoId())
                 .numeroParcelas(dto.numeroParcelas() != null ? dto.numeroParcelas() : 1)
                 .dataLancamento(dto.dataLancamento() != null ? dto.dataLancamento() : LocalDate.now())
                 .dataVencimento(dto.dataVencimento())
@@ -90,15 +106,7 @@ public class LancamentoService {
     public List<LancamentoResponseDTO> criarParcelado(LancamentoParceladoRequestDTO dto) {
         String email = getEmailAutenticado();
 
-        if (dto.formaPagamento() == FormaPagamento.CARTAO_CREDITO) {
-            if (dto.cartaoCreditoId() == null) {
-                throw new LancamentoNaoAutorizadoException("Cartão de crédito é obrigatório para esta forma de pagamento");
-            }
-            cartaoCreditoRepository
-                    .findByIdAndUsuarioIdAndAtivoTrue(dto.cartaoCreditoId(), email)
-                    .orElseThrow(() -> new LancamentoNaoEncontradoException("Cartão de crédito não encontrado"));
-        }
-
+        validarCartaoCredito(dto.formaPagamento(), dto.cartaoCreditoId(), email);
         validarCentroCusto(dto.centroCustoId());
 
         String grupoParcelaId = UUID.randomUUID().toString();
@@ -193,12 +201,14 @@ public class LancamentoService {
         }
 
         validarCentroCusto(dto.centroCustoId());
+        validarCartaoCredito(dto.formaPagamento(), dto.cartaoCreditoId(), email);
 
         lancamento.setDescricao(dto.descricao());
         lancamento.setValorOriginal(dto.valorOriginal());
         lancamento.setTaxaJuros(dto.taxaJuros());
         lancamento.setTipoJuros(dto.tipoJuros());
         lancamento.setFormaPagamento(dto.formaPagamento());
+        lancamento.setCartaoCreditoId(dto.cartaoCreditoId());
         lancamento.setNumeroParcelas(dto.numeroParcelas() != null ? dto.numeroParcelas() : 1);
         lancamento.setJuros(dto.juros());
         lancamento.setDesconto(dto.desconto());
@@ -221,10 +231,41 @@ public class LancamentoService {
             throw new LancamentoNaoAutorizadoException("Acesso negado");
         }
 
+        if (lancamento.getStatus() == StatusLancamento.EFETIVADO) {
+            throw new LancamentoNaoAutorizadoException(
+                    "Lançamento já efetivado não pode ser excluído, pois geraria um movimento bancário " +
+                    "órfão na conta. Cancele o lançamento em vez de excluir.");
+        }
+
         lancamento.setAtivo(false);
         lancamentoRepository.save(lancamento);
     }
 
+    /** Exclui de uma vez todas as parcelas do grupo (mesma compra parcelada). Parcelas já
+     *  efetivadas são preservadas — mesma regra do {@link #deletar}, aplicada individualmente
+     *  a cada parcela, pra não deixar movimento bancário órfão. */
+    @Transactional
+    public void deletarGrupo(String grupoParcelaId) {
+        String email = getEmailAutenticado();
+        List<Lancamento> parcelas = lancamentoRepository
+                .findByGrupoParcelaIdAndUsuarioIdAndAtivoTrue(grupoParcelaId, email);
+
+        if (parcelas.isEmpty()) {
+            throw new LancamentoNaoEncontradoException("Grupo de parcelas não encontrado");
+        }
+
+        for (Lancamento parcela : parcelas) {
+            if (parcela.getStatus() != StatusLancamento.EFETIVADO) {
+                parcela.setAtivo(false);
+            }
+        }
+        lancamentoRepository.saveAll(parcelas);
+    }
+
+    /** Registra o lançamento bancário na conta ANTES de marcar o título como EFETIVADO: se a chamada a
+     *  ms-contas falhar (conta não encontrada, saldo insuficiente, serviço fora do ar), a exceção é
+     *  propagada e nada é persistido aqui — o título continua PENDENTE, sem estado parcial (título
+     *  efetivado sem o saldo da conta ter sido atualizado). */
     public LancamentoResponseDTO efetivar(Long id, EfetivarRequestDTO dto) {
         String email = getEmailAutenticado();
         Lancamento lancamento = lancamentoRepository.findByIdAndAtivoTrue(id)
@@ -238,8 +279,29 @@ public class LancamentoService {
             throw new LancamentoNaoAutorizadoException("Lançamento cancelado não pode ser efetivado");
         }
 
+        LocalDate dataPagamento = dto.dataPagamento() != null ? dto.dataPagamento() : LocalDate.now();
+
+        try {
+            contaClient.registrarLancamento(dto.contaId(),
+                    new LancamentoBancarioRequestDTO(
+                            lancamento.getTipo() == TipoLancamento.RECEITA
+                                    ? TipoMovimentoBancario.ENTRADA : TipoMovimentoBancario.SAIDA,
+                            lancamento.getValor(),
+                            dataPagamento,
+                            lancamento.getDescricao(),
+                            lancamento.getId()
+                    ), getToken());
+        } catch (FeignException.NotFound e) {
+            throw new LancamentoNaoEncontradoException("Conta não encontrada");
+        } catch (FeignException e) {
+            throw new LancamentoNaoAutorizadoException(
+                    "Não foi possível lançar na conta selecionada (saldo insuficiente ou erro na conta). " +
+                    "O título não foi efetivado.");
+        }
+
+        lancamento.setContaId(dto.contaId());
         lancamento.setStatus(StatusLancamento.EFETIVADO);
-        lancamento.setDataPagamento(dto.dataPagamento() != null ? dto.dataPagamento() : LocalDate.now());
+        lancamento.setDataPagamento(dataPagamento);
         return LancamentoResponseDTO.fromEntity(lancamentoRepository.save(lancamento));
     }
 
@@ -255,5 +317,14 @@ public class LancamentoService {
                         l.getUsuarioId()
                 ))
                 .toList();
+    }
+
+    /** Apaga de vez todos os lançamentos e cartões de crédito do usuário (exclusão de conta em cascata).
+     *  Lançamentos primeiro: cartao_credito_id em lancamentos tem FK pra cartao_credito, então apagar
+     *  os cartões antes quebraria a integridade referencial se sobrasse algum lançamento. */
+    @Transactional
+    public void excluirDadosUsuario(String usuarioId) {
+        lancamentoRepository.deleteByUsuarioId(usuarioId);
+        cartaoCreditoRepository.deleteByUsuarioId(usuarioId);
     }
 }

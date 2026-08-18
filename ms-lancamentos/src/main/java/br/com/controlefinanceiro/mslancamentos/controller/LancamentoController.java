@@ -61,10 +61,15 @@ public class LancamentoController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/grupo/{grupoParcelaId}")
+    public ResponseEntity<Void> deletarGrupo(@PathVariable String grupoParcelaId) {
+        lancamentoService.deletarGrupo(grupoParcelaId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/{id}/efetivar")
     public ResponseEntity<LancamentoResponseDTO> efetivar(@PathVariable Long id,
-                                                          @RequestBody(required = false) EfetivarRequestDTO dto) {
-        if (dto == null) dto = new EfetivarRequestDTO(null);
+                                                          @RequestBody @Valid EfetivarRequestDTO dto) {
         return ResponseEntity.ok(lancamentoService.efetivar(id, dto));
     }
 }

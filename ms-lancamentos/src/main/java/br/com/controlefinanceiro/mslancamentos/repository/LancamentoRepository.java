@@ -26,4 +26,8 @@ public interface LancamentoRepository extends JpaRepository<Lancamento, Long> {
 
     Optional<Lancamento> findByIdAndAtivoTrue(Long id);
 
+    List<Lancamento> findByGrupoParcelaIdAndUsuarioIdAndAtivoTrue(String grupoParcelaId, String usuarioId);
+
+    void deleteByUsuarioId(String usuarioId);
+
 }

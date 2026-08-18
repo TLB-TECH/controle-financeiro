@@ -45,5 +45,7 @@ public record LancamentoRequestDTO(
 
         String observacao,
 
-        Long centroCustoId
+        Long centroCustoId,
+
+        Long cartaoCreditoId
 ) {}

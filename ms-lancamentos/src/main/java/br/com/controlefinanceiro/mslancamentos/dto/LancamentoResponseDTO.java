@@ -31,6 +31,7 @@ public record LancamentoResponseDTO(
         LocalDate dataPagamento,
         String observacao,
         Long centroCustoId,
+        Long contaId,
         Boolean ativo,
         LocalDateTime criadoEm,
         LocalDateTime atualizadoEm
@@ -58,6 +59,7 @@ public record LancamentoResponseDTO(
                 l.getDataPagamento(),
                 l.getObservacao(),
                 l.getCentroCustoId(),
+                l.getContaId(),
                 l.getAtivo(),
                 l.getCriadoEm(),
                 l.getAtualizadoEm()
