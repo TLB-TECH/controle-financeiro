@@ -1,0 +1,26 @@
+package br.com.controlefinanceiro.ms.centrocusto.repository;
+
+import br.com.controlefinanceiro.ms.centrocusto.model.CentroCusto;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface CentroCustoRepository extends JpaRepository<CentroCusto, Long> {
+
+    List<CentroCusto> findByUsuarioIdAndAtivoTrue(String usuarioId);
+
+    List<CentroCusto> findByUsuarioIdAndAtivoFalse(String usuarioId);
+
+    List<CentroCusto> findByUsuarioId(String usuarioId);
+
+    Optional<CentroCusto> findByIdAndUsuarioIdAndAtivoTrue(Long id, String usuarioId);
+
+    Optional<CentroCusto> findByIdAndUsuarioIdAndAtivoFalse(Long id, String usuarioId);
+
+    Optional<CentroCusto> findByIdAndUsuarioId(Long id, String usuarioId);
+
+    boolean existsByNomeAndUsuarioIdAndAtivoTrue(String nome, String usuarioId);
+
+    void deleteByUsuarioId(String usuarioId);
+}
