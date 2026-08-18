@@ -12,6 +12,16 @@
 
 ---
 
+<p align="center">
+  <img src="docs/screenshots/dashboard.jpg" alt="Dashboard do Controle Financeiro" width="90%">
+</p>
+<p align="center">
+  <img src="docs/screenshots/login.jpg" alt="Tela de login" width="43%">
+  <img src="docs/screenshots/lancamentos.jpg" alt="Tela de lançamentos" width="43%">
+</p>
+
+---
+
 ## 📋 Sobre o Projeto
 
 Aplicação full-stack para controle de finanças pessoais, com foco em **aprendizado de arquitetura distribuída** e construção de **portfólio profissional**.
