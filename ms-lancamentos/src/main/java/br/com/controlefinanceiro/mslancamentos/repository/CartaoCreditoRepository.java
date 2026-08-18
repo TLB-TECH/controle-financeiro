@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface CartaoCreditoRepository extends JpaRepository<CartaoCredito, Long> {
     List<CartaoCredito> findByUsuarioIdAndAtivoTrue(String usuarioId);
     Optional<CartaoCredito> findByIdAndUsuarioIdAndAtivoTrue(Long id, String usuarioId);
+    void deleteByUsuarioId(String usuarioId);
 }

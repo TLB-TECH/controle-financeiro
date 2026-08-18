@@ -84,6 +84,9 @@ public class Lancamento {
     @Column(name = "centro_custo_id")
     private Long centroCustoId;
 
+    @Column(name = "conta_id")
+    private Long contaId;
+
     @Column(name = "cartao_credito_id")
     private Long cartaoCreditoId;
 

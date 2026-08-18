@@ -30,4 +30,17 @@ public class LancamentoInternoController {
 
         return ResponseEntity.ok(lancamentoService.buscarVencendoHoje());
     }
+
+    @DeleteMapping("/lancamentos/usuarios/{usuarioId}")
+    public ResponseEntity<Void> excluirDadosUsuario(
+            @PathVariable String usuarioId,
+            @RequestHeader("X-Internal-Secret") String secret) {
+
+        if (!internalSecret.equals(secret)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        lancamentoService.excluirDadosUsuario(usuarioId);
+        return ResponseEntity.noContent().build();
+    }
 }

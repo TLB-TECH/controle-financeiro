@@ -1,0 +1,2 @@
+ALTER TABLE lancamentos
+    ADD COLUMN IF NOT EXISTS conta_id BIGINT;
