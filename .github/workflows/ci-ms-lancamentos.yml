@@ -43,3 +43,4 @@ jobs:
           DB_PASSWORD: postgres
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRATION: 86400000
+          INTERNAL_SECRET: ${{ secrets.INTERNAL_SECRET }}
