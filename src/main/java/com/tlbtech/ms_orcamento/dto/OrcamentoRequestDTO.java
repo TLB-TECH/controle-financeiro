@@ -1,5 +1,7 @@
 package com.tlbtech.ms_orcamento.dto;
 
+import com.tlbtech.ms_orcamento.model.TipoAlvoOrcamento;
+import com.tlbtech.ms_orcamento.model.TipoOrcamento;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -9,15 +11,20 @@ import java.math.BigDecimal;
 
 public record OrcamentoRequestDTO(
 
-        @NotNull(message = "Centro de custo obrigatório")
+        @NotNull(message = "Alvo do orçamento obrigatório")
+        TipoAlvoOrcamento tipoAlvo,
+
         Long centroCustoId,
 
-        @NotNull(message = "Mês obrigatório")
+        Long cartaoCreditoId,
+
+        @NotNull(message = "Tipo de orçamento obrigatório")
+        TipoOrcamento tipo,
+
         @Min(value = 1, message = "Mês inválido")
         @Max(value = 12, message = "Mês inválido")
         Integer mes,
 
-        @NotNull(message = "Ano obrigatório")
         @Min(value = 2000, message = "Ano Inválido")
         Integer ano,
 
