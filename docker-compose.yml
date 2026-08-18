@@ -91,33 +91,45 @@ services:
   ms-usuarios:
     build: ../ms-usuarios
     container_name: ms-usuarios
-    ports:
-      - "8081:8081"
+    expose:
+      - "8081"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-usuarios:5432/CF_usuarios
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
-      MAIL_USERNAME: taciolb@gmail.com
-      MAIL_PASSWORD: bmes yrns atjz bhnf
-      APP_URL: http://localhost:4200
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      APP_URL: ${APP_URL:-http://localhost:4200}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
+      MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET}
+      MS_LANCAMENTOS_URL: http://ms-lancamentos:8083
+      MS_CENTRO_CUSTO_URL: http://ms-centro-custo:8082
+      MS_CONTAS_URL: http://ms-contas:8087
+      MS_ORCAMENTO_URL: http://ms-orcamento:8088
     depends_on:
       - postgres-usuarios
+      - ms-lancamentos
+      - ms-centro-custo
+      - ms-contas
+      - ms-orcamento
     networks:
       - financeiro-network
 
   ms-centro-custo:
     build: ../ms-centro-custo
     container_name: ms-centro-custo
-    ports:
-      - "8082:8082"
+    expose:
+      - "8082"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-centrocusto:5432/CF_centrocusto
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
     depends_on:
       - postgres-centrocusto
     networks:
@@ -126,8 +138,8 @@ services:
   ms-lancamentos:
     build: ../ms-lancamentos
     container_name: ms-lancamentos
-    ports:
-      - "8083:8083"
+    expose:
+      - "8083"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-lancamentos:5432/CF_lancamentos
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
@@ -135,18 +147,20 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
       MS_CENTRO_CUSTO_URL: http://ms-centro-custo:8082
+      MS_CONTAS_URL: http://ms-contas:8087
       INTERNAL_SECRET: ${INTERNAL_SECRET}
     depends_on:
       - postgres-lancamentos
       - ms-centro-custo
+      - ms-contas
     networks:
       - financeiro-network
 
   ms-fluxo-caixa:
     build: ../ms-fluxo-caixa
     container_name: ms-fluxo-caixa
-    ports:
-      - "8084:8084"
+    expose:
+      - "8084"
     environment:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
@@ -177,8 +191,8 @@ services:
   ms-notificacao:
     build: ../ms-notificacao
     container_name: ms-notificacao
-    ports:
-      - "8086:8086"
+    expose:
+      - "8086"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notificacao:5432/CF_notificacao
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
@@ -226,14 +240,15 @@ services:
   ms-contas:
     build: ../ms-contas
     container_name: ms-contas
-    ports:
-      - "8087:8087"
+    expose:
+      - "8087"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-contas:5432/CF_contas
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
     depends_on:
       - postgres-contas
     networks:
@@ -242,14 +257,15 @@ services:
   ms-orcamento:
     build: ../ms-orcamento
     container_name: ms-orcamento
-    ports:
-      - "8088:8088"
+    expose:
+      - "8088"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-orcamento:5432/CF_orcamento
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
     depends_on:
       - postgres-orcamento
     networks:
@@ -263,6 +279,7 @@ services:
     environment:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
       MS_USUARIOS_URL: http://ms-usuarios:8081
       MS_LANCAMENTOS_URL: http://ms-lancamentos:8083
       MS_CENTRO_CUSTO_URL: http://ms-centro-custo:8082
@@ -277,6 +294,35 @@ services:
       - bff-financeiro
       - ms-contas
       - ms-orcamento
+    networks:
+      - financeiro-network
+
+  # Backup diário (3h) de todos os bancos Postgres, com backup imediato ao subir o container
+  # e retenção de 14 dias. Ver backup/backup.sh e backup/restore.sh.
+  backup:
+    image: postgres:15-alpine
+    container_name: backup-financeiro
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./backups:/backups
+      - ./backup/backup.sh:/backup.sh:ro
+      - ./backup/restore.sh:/restore.sh:ro
+    entrypoint: >
+      sh -c "
+      echo '0 3 * * * sh /backup.sh >> /backups/backup.log 2>&1' > /etc/crontabs/root &&
+      sh /backup.sh &&
+      crond -f -l 2
+      "
+    depends_on:
+      - postgres-usuarios
+      - postgres-contas
+      - postgres-centrocusto
+      - postgres-lancamentos
+      - postgres-orcamento
+      - postgres-notificacao
+      - postgres-evolution
     networks:
       - financeiro-network
 
