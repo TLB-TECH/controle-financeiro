@@ -36,30 +36,30 @@ O projeto foi desenvolvido seguindo boas práticas de mercado: microsserviços i
 ┌──────────────────────────────────────────────────────────────────┐
 │                      Angular Frontend (4200)                     │
 └───────────────────────────────┬──────────────────────────────────┘
-                                 │
-┌────────────────────────────────▼──────────────────────────────────┐
-│           API Gateway — Spring Cloud Gateway (8080)                │
-│   JWT Validation · Verificação de assinatura ativa · Roteamento    │
-└──┬────────┬─────────┬─────────┬─────────┬─────────┬────────┬──────┘
-   │        │         │         │         │         │        │
-┌──▼───┐ ┌─▼────┐ ┌──▼───┐ ┌───▼──┐ ┌────▼───┐ ┌───▼───┐    │
-│  ms- │ │  ms- │ │  ms- │ │  ms- │ │   ms-  │ │  ms-  │    │
-│usuár.│ │c.cus.│ │lanc. │ │fluxo │ │ contas │ │orçam. │    │
-│(8081)│ │(8082)│ │(8083)│ │(8084)│ │ (8087) │ │(8088) │    │
-└──┬───┘ └──────┘ └──────┘ └──────┘ └────────┘ └───────┘    │
-   │  db por serviço (PostgreSQL)                            │
-   │ Mercado Pago (assinatura)                                │
-   │                                          ┌────────────────▼───┐
-┌──▼──────────────────────────────┐          │  bff-financeiro     │
-│  ms-notificacao (8086)          │          │      (8085)         │
-│  Scheduler diário de vencimentos│          │ Agrega: lanc. +      │
-│  Email (SendGrid) + WhatsApp    │          │ c.custo + fluxo      │
-└──┬───────────────────────────────┘         └──────────────────────┘
+                                │
+┌───────────────────────────────▼───────────────────────────────────┐
+│           API Gateway — Spring Cloud Gateway (8080)               │
+│   JWT Validation · Verificação de assinatura ativa · Roteamento   │
+└───┬─────────┬─────────┬─────────┬─────────┬─────────┬────────┬────┘
+    │         │         │         │         │         │        │
+┌───▼───┐ ┌───▼───┐ ┌───▼───┐ ┌───▼───┐ ┌───▼───┐ ┌───▼───┐    │
+│  ms-  │ │  ms-  │ │  ms-  │ │  ms-  │ │  ms-  │ │  ms-  │    │
+│ usuár.│ │ c.cus.│ │ lanc. │ │ fluxo │ │ contas│ │ orçam.│    │
+│ (8081)│ │ (8082)│ │ (8083)│ │ (8084)│ │ (8087)│ │ (8088)│    │
+└──┬────┘ └───────┘ └───────┘ └───────┘ └───────┘ └───────┘    │
+   │  db por serviço (PostgreSQL)                              │
+   │ Mercado Pago (assinatura)                                 │
+   │                                             ┌─────────────▼──┐
+┌──▼──────────────────────────────┐              │ bff-financeiro │
+│  ms-notificacao (8086)          │              │     (8085)     │
+│  Scheduler diário de vencimentos│              │ Agrega: lanc. +│
+│  Email (SendGrid) + WhatsApp    │              │ c.custo + fluxo│
+└──┬──────────────────────────────┘              └────────────────┘
    │
-┌──▼──────────────┐
-│ Evolution API    │
-│    (8089)        │
-└───────────────────┘
+┌──▼─────────────┐
+│ Evolution API  │
+│    (8089)      │
+└────────────────┘
 ```
 
 ### Por que essa arquitetura?
